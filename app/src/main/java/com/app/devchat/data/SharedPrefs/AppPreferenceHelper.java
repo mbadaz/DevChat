@@ -3,11 +3,22 @@ package com.app.devchat.data.SharedPrefs;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.app.devchat.BuildConfig;
+import com.app.devchat.data.DataManager;
+
 /**
  * Handles saving and getting data from the app's Shared Preferences storage.
  */
 
 public class AppPreferenceHelper implements PreferenceHelper {
+    private static final String USER_INFO_PREFERENCE_FILE_KEY = BuildConfig.APPLICATION_ID + ".user_info";
+    private static final String KEY_USERNAME = "username";
+    private static final String KEY_LOGIN_STATUS = "login_status";
+    int LOGGED_IN = 1;
+    int LOGGED_OUT = 0;
+    private static final String KEY_USER_EMAIL = "user_email";
+    private static final String KEY_USER_STATUS = "user_status";
+
 
     private SharedPreferences mSharedPrefs;
 
@@ -16,13 +27,13 @@ public class AppPreferenceHelper implements PreferenceHelper {
     }
 
     @Override
-    public String getLoginStatus() {
-        return mSharedPrefs.getString(KEY_LOGIN_STATUS, "");
+    public int getLoginStatus() {
+        return mSharedPrefs.getInt(KEY_LOGIN_STATUS, -1);
     }
 
     @Override
-    public void setLoginStatus(int value) {
-        mSharedPrefs.edit().putInt(KEY_LOGIN_STATUS, value).apply();
+    public void setLoginStatus(DataManager.LoginMode loginMode) {
+        mSharedPrefs.edit().putInt(KEY_LOGIN_STATUS, loginMode.getMode()).apply();
     }
 
     @Override

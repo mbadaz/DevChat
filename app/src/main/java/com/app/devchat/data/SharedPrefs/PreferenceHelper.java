@@ -1,6 +1,6 @@
 package com.app.devchat.data.SharedPrefs;
 
-import com.app.devchat.BuildConfig;
+import com.app.devchat.data.DataManager;
 
 /**
  * Exposes the app's Shared Preference API and should be implemented by any class that wants to
@@ -9,16 +9,9 @@ import com.app.devchat.BuildConfig;
  */
 
 public interface PreferenceHelper {
-    String USER_INFO_PREFERENCE_FILE_KEY = BuildConfig.APPLICATION_ID + ".user_info";
-    String KEY_USERNAME = "username";
-    String KEY_LOGIN_STATUS = "login_status";
-    int LOGGED_IN = 1;
-    int LOGGED_OUT = 0;
-    String KEY_USER_EMAIL = "user_email";
-    String KEY_USER_STATUS = "user_status";
 
-    String getLoginStatus();
-    void setLoginStatus(int value);
+    int getLoginStatus();
+    void setLoginStatus(DataManager.LoginMode loginMode);
 
     String getUserName();
     void setUserName(String value);
