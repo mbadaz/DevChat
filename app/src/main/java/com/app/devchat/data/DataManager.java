@@ -1,10 +1,15 @@
 package com.app.devchat.data;
 
 import com.app.devchat.data.Network.NetworkingHelper;
-import com.app.devchat.data.SharedPrefs.PreferenceHelper;
+import com.app.devchat.data.SharedPrefs.PreferencesHelper;
 import com.app.devchat.data.SqlDatabase.DbHelper;
 
-public interface DataManager extends PreferenceHelper, NetworkingHelper, DbHelper {
+/**
+ * Interface which provides the contract methods for interacting with the app's
+ * datasources i.e {@link com.app.devchat.data.SharedPrefs.AppPreferenceHelper},
+ * {@link com.app.devchat.data.SqlDatabase.AppDbHelper} &
+ */
+public interface DataManager extends PreferencesHelper, NetworkingHelper, DbHelper {
 
     enum LoginMode{
         LOGGED_OUT(0),

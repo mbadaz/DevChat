@@ -8,7 +8,7 @@ import com.app.devchat.data.DataManager;
  * wants to expose the app's Shared Preferences API
  */
 
-public interface PreferenceHelper {
+public interface PreferencesHelper {
 
     int getLoginStatus();
     void setLoginStatus(DataManager.LoginMode loginMode);

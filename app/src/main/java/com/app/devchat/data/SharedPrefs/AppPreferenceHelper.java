@@ -10,7 +10,7 @@ import com.app.devchat.data.DataManager;
  * Handles saving and getting data from the app's Shared Preferences storage.
  */
 
-public class AppPreferenceHelper implements PreferenceHelper {
+public class AppPreferenceHelper implements PreferencesHelper {
     private static final String USER_INFO_PREFERENCE_FILE_KEY = BuildConfig.APPLICATION_ID + ".user_info";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_LOGIN_STATUS = "login_status";

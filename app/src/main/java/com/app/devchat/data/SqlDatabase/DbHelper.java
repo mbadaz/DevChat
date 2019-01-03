@@ -2,7 +2,10 @@ package com.app.devchat.data.SqlDatabase;
 
 import com.app.devchat.chat.Message;
 
-import java.util.List;
+import java.util.ArrayList;
+
+import androidx.lifecycle.LiveData;
+import androidx.paging.PagedList;
 
 /**
  * Exposes the app's SQLite Database API and should be implemented by any class that wants
@@ -12,6 +15,7 @@ import java.util.List;
 
 public interface DbHelper {
 
-    List<Message> getStoredMessages();
-    void storeMessages(List<Message> messages);
+    LiveData<PagedList<Message>> getMessages();
+
+    void storeMessages(ArrayList<Message> messages);
 }
