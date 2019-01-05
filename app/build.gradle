@@ -10,6 +10,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -57,4 +58,10 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-core:16.0.6'
     implementation 'com.google.firebase:firebase-database:16.0.5'
+    implementation 'com.google.firebase:firebase-firestore:17.1.5'
+
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.google.errorprone:error_prone_annotations:2.3.1'
+    implementation 'org.checkerframework:checker-compat-qual:2.5.3'
+
 }

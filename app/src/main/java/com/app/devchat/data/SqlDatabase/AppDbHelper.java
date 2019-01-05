@@ -4,7 +4,7 @@ import android.app.Application;
 import android.os.AsyncTask;
 
 import com.app.devchat.BuildConfig;
-import com.app.devchat.chat.Message;
+import com.app.devchat.data.Message;
 
 import java.util.ArrayList;
 
@@ -24,6 +24,8 @@ public class AppDbHelper implements DbHelper {
     private AppDatabase db;
 
     public AppDbHelper(Application application) {
+
+        //TODO implement proper migration policy
         db = Room.databaseBuilder(application, AppDatabase.class, DB_NAME).
                 fallbackToDestructiveMigration().build();
         messagesList = new LivePagedListBuilder<>(db.messageDAO().
@@ -32,12 +34,12 @@ public class AppDbHelper implements DbHelper {
     }
 
     @Override
-    public LiveData<PagedList<Message>>getMessages() {
+    public LiveData<PagedList<Message>> getMessagesFromLocal() {
         return messagesList;
     }
 
     @Override
-    public void storeMessages(ArrayList<Message> messages) {
+    public void storeMessagesToLocal(ArrayList<Message> messages) {
         SaveMessagesTask task = new SaveMessagesTask(db.messageDAO(), messages);
         task.execute();
     }

@@ -1,15 +1,20 @@
 package com.app.devchat.data;
 
-import com.app.devchat.data.Network.NetworkingHelper;
+import com.app.devchat.data.Network.NetworkHelper;
 import com.app.devchat.data.SharedPrefs.PreferencesHelper;
 import com.app.devchat.data.SqlDatabase.DbHelper;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.QuerySnapshot;
 
 /**
  * Interface which provides the contract methods for interacting with the app's
- * datasources i.e {@link com.app.devchat.data.SharedPrefs.AppPreferenceHelper},
- * {@link com.app.devchat.data.SqlDatabase.AppDbHelper} &
+ * datasources APIs i.e
+ * {@link com.app.devchat.data.SharedPrefs.AppPreferenceHelper}
+ * {@link com.app.devchat.data.SqlDatabase.AppDbHelper}
+ * {@link com.app.devchat.data.Network.AppNetworkHelper }
  */
-public interface DataManager extends PreferencesHelper, NetworkingHelper, DbHelper {
+public interface DataManager extends PreferencesHelper, NetworkHelper, DbHelper, EventListener<QuerySnapshot>, OnSuccessListener<QuerySnapshot> {
 
     enum LoginMode{
         LOGGED_OUT(0),

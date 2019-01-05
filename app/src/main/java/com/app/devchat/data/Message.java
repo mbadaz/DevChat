@@ -1,4 +1,4 @@
-package com.app.devchat.chat;
+package com.app.devchat.data;
 
 import java.util.Date;
 
@@ -9,6 +9,7 @@ import androidx.room.PrimaryKey;
 
 @Entity(tableName = "Messages")
 public class Message {
+
     @PrimaryKey(autoGenerate = true)
     @NonNull
     public int id;
@@ -19,12 +20,15 @@ public class Message {
     @ColumnInfo
     public Date time;
 
+    @ColumnInfo
+    public String sender;
 
-    public Message(String text, Date time) {
+
+    public Message(String text, Date time, String sender) {
         this.text = text;
         this.time = time;
+        this.sender = sender;
     }
-
 
     public String getText() {
         return text;
@@ -32,5 +36,9 @@ public class Message {
 
     public Date getTime() {
         return time;
+    }
+
+    public String getSender() {
+        return sender;
     }
 }

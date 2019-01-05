@@ -1,6 +1,6 @@
 package com.app.devchat.data.SqlDatabase;
 
-import com.app.devchat.chat.Message;
+import com.app.devchat.data.Message;
 
 import java.util.ArrayList;
 
@@ -15,7 +15,7 @@ import androidx.paging.PagedList;
 
 public interface DbHelper {
 
-    LiveData<PagedList<Message>> getMessages();
+    LiveData<PagedList<Message>> getMessagesFromLocal();
 
-    void storeMessages(ArrayList<Message> messages);
+    void storeMessagesToLocal(ArrayList<Message> messages);
 }

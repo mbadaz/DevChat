@@ -1,6 +1,6 @@
 package com.app.devchat.data.SqlDatabase;
 
-import com.app.devchat.chat.Message;
+import com.app.devchat.data.Message;
 
 import java.util.List;
 
