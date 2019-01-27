@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/listItem_root_view"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/dimen_chat_bubble_side_margin"
+    android:layout_marginLeft="@dimen/dimen_chat_bubble_side_margin"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:padding="4dp"
+    android:background="@drawable/in_bubble">
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/message_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@android:color/black"/>
+
+    <TextView
+        android:id="@+id/message_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/message_text"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="12dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        tools:text="@tools:sample/date/hhmm" />
+</RelativeLayout>

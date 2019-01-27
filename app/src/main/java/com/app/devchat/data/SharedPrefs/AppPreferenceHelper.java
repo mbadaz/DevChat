@@ -38,7 +38,7 @@ public class AppPreferenceHelper implements PreferencesHelper {
 
     @Override
     public String getUserName() {
-        return mSharedPrefs.getString(KEY_USERNAME, "anonymous");
+        return mSharedPrefs.getString(KEY_USERNAME, "phone");
     }
 
     @Override

@@ -83,7 +83,7 @@ public class ExampleInstrumentedTest {
         messages.add(new Message("message 3", new Date(), ""));
         */
 
-        networkHelper.getNewMessagesFromBackend(new Date(), new EventListener<QuerySnapshot>() {
+        networkHelper.listenForNewMessages(new Date(), new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                 assertTrue(queryDocumentSnapshots.getDocuments().isEmpty());

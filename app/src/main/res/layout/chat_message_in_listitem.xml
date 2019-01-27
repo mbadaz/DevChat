@@ -2,36 +2,109 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/listItem_root_view"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="4dp">
+    android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/message_sender"
+    <RelativeLayout
+        android:id="@+id/in_message_root_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        tools:text="sender name" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="@dimen/dimen_chat_bubble_side_margin"
+        android:layout_marginRight="@dimen/dimen_chat_bubble_side_margin"
+        android:background="@drawable/in_bubble">
 
-    <TextView
-        android:id="@+id/message_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/message_sender"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        tools:text="@tools:sample/lorem" />
+        <TextView
+            android:id="@+id/in_message_sender"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            tools:text="sender name" />
 
-    <TextView
-        android:id="@+id/message_time"
+        <TextView
+            android:id="@+id/in_message_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/in_message_sender"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@android:color/black"
+            tools:text="@tools:sample/lorem" />
+
+        <TextView
+            android:id="@+id/in_message_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/in_message_text"
+            android:layout_marginEnd="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="0dp"
+            android:layout_toEndOf="@id/in_message_text"
+            android:layout_toRightOf="@id/in_message_text"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            tools:text="@tools:sample/date/hhmm" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/out_message_root_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/message_text"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        tools:text="@tools:sample/date/hhmm" />
+        android:layout_marginStart="@dimen/dimen_chat_bubble_side_margin"
+        android:layout_marginLeft="@dimen/dimen_chat_bubble_side_margin"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/out_bubble">
+
+        <TextView
+            android:id="@+id/out_message_sender"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="4dp"
+            android:layout_marginLeft="4dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            tools:text="sender name" />
+
+        <TextView
+            android:id="@+id/out_message_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/out_message_sender"
+            android:layout_marginStart="4dp"
+            android:layout_marginLeft="4dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@android:color/black"
+            tools:text="@tools:sample/lorem" />
+
+        <TextView
+            android:id="@+id/out_message_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/out_message_text"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="4dp"
+            android:layout_toEndOf="@id/out_message_text"
+            android:layout_toRightOf="@id/out_message_text"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            tools:text="@tools:sample/date/hhmm" />
+
+    </RelativeLayout>
+
 </RelativeLayout>
+
+
+

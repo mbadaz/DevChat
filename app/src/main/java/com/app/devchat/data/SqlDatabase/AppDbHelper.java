@@ -9,6 +9,7 @@ import com.app.devchat.data.Message;
 import java.util.ArrayList;
 
 import androidx.lifecycle.LiveData;
+import androidx.paging.DataSource;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 import androidx.room.Room;
@@ -28,8 +29,13 @@ public class AppDbHelper implements DbHelper {
         //TODO implement proper migration policy
         db = Room.databaseBuilder(application, AppDatabase.class, DB_NAME).
                 fallbackToDestructiveMigration().build();
-        messagesList = new LivePagedListBuilder<>(db.messageDAO().
-                getMessages(), 5).setInitialLoadKey(10).
+        PagedList.Config config = new PagedList.Config.Builder().
+                setEnablePlaceholders(false).setPrefetchDistance(120).
+                setInitialLoadSizeHint(40).
+                setPageSize(40).
+                build();
+        DataSource.Factory<Integer, Message> dataSource = db.messageDAO().getMessages();
+        messagesList = new LivePagedListBuilder<>(dataSource, config).
                 build();
     }
 

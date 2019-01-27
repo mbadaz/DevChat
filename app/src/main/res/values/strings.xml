@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">DevChat</string>
+    <string name="string_send_btn_label">Send</string>
+    <string name="string_message_input_hint">Type in message</string>
 </resources>

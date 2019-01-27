@@ -41,4 +41,10 @@ public class Message {
     public String getSender() {
         return sender;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        Message message = (Message) obj;
+        return message.text.equals(text) && message.time == time;
+    }
 }

@@ -31,7 +31,7 @@ public class AppDataManager implements DataManager {
     private PreferencesHelper preferencesHelper;
     private DbHelper dbHelper;
     private NetworkHelper networkHelper;
-    private String userName;
+    public String userName;
 
     public LiveData<PagedList<Message>> liveMessages;
 
@@ -52,20 +52,13 @@ public class AppDataManager implements DataManager {
         }
     }
 
-    private void loadData() {
+    public void loadData() {
         liveMessages = getMessagesFromLocal();
-
-        if(liveMessages.getValue().isEmpty()){
-            // if no message in local database get new messages from backend database
-            getNewMessagesFromBackend(new Date(), this);
-        }else {
-            // get from the Firebase storage messages newer than the most recent in the local database
-            int count = liveMessages.getValue().getLoadedCount();
-            Message latestMessage = liveMessages.getValue().get(count - 1);
-            getNewMessagesFromBackend(latestMessage.getTime(), this);
-        }
-
         userName = getUserName();
+    }
+
+    public void getNewMessages(Date date){
+        getNewMessagesFromBackend(date, this);
     }
 
     public void sendNewMessage(String text){
@@ -78,19 +71,18 @@ public class AppDataManager implements DataManager {
     // ********* Firebase database access methods **********************
 
     @Override
-    public void getNewMessagesFromBackend(Date date, EventListener<QuerySnapshot> eventListener) {
-        networkHelper.getNewMessagesFromBackend(date, eventListener);
+    public void listenForNewMessages(EventListener<QuerySnapshot> eventListener, Date date) {
+        networkHelper.listenForNewMessages(eventListener, date);
     }
 
     @Override
-    public void getMessagesFromBackend(OnSuccessListener listener) {
-        networkHelper.getMessagesFromBackend(listener);
+    public void getNewMessagesFromBackend(Date date, OnSuccessListener listener) {
+        networkHelper.getNewMessagesFromBackend(date, listener);
     }
 
     @Override
     public void sendMessagesToBackend(ArrayList<Message> messages) {
         networkHelper.sendMessagesToBackend(messages);
-        storeMessagesToLocal(messages);
     }
 
 
@@ -158,47 +150,59 @@ public class AppDataManager implements DataManager {
 
     /**
      * Listener for listening for realtime new messages snapshots from Firebase database.
-     * Is passed to {@link #getNewMessagesFromBackend(Date, EventListener)}
+     * Is passed to {@link #listenForNewMessages(EventListener, Date)}
      * @param queryDocumentSnapshots Document snapshots received from Firebase
      * @param e
      */
     @Override
     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-        if(e == null && queryDocumentSnapshots != null){
-            List<DocumentSnapshot> documentSnapshots = queryDocumentSnapshots.getDocuments();
-            ArrayList<Message> newMessages = new ArrayList<>();
+        if(!queryDocumentSnapshots.getMetadata().isFromCache()){
 
-            for(DocumentSnapshot documentSnapshot : documentSnapshots){
-                String text = documentSnapshot.getString("text");
-                Date time = documentSnapshot.getDate("time");
-                String sender = documentSnapshot.getString("sender");
-                newMessages.add(new Message(text, time, sender));
+            if(e == null && queryDocumentSnapshots != null){
+                List<DocumentSnapshot> documentSnapshots = queryDocumentSnapshots.getDocuments();
+                ArrayList<Message> newMessages = new ArrayList<>();
+
+                if(documentSnapshots.size() > 0){
+                    for(DocumentSnapshot documentSnapshot : documentSnapshots){
+                        String text = documentSnapshot.getString("text");
+                        Date time = documentSnapshot.getDate("time");
+                        String sender = documentSnapshot.getString("sender");
+
+                        if(!sender.equals(userName)) {
+                            newMessages.add(new Message(text, time, sender));
+                        }
+                    }
+
+                    storeMessagesToLocal(newMessages);
+                }
+                Log.d(TAG, "snapshot from Firebase" + queryDocumentSnapshots.toString());
+            }else {
+                Log.e(TAG, e.getMessage());
             }
-
-            // store new messages to local database
-            storeMessagesToLocal(newMessages);
-        }else {
-            Log.e(TAG, e.getMessage());
         }
+
     }
 
     /**
      * {@link OnSuccessListener} listener for listening for the completion of a data request
-     * query to the Firebase database. Is passed to {@link #getMessagesFromBackend(OnSuccessListener)}
+     * query to the Firebase database. Is passed to {@link #getNewMessagesFromBackend(Date, OnSuccessListener)}
      * @param queryDocumentSnapshots : Response data from the Firebase database
      */
     @Override
     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
         List<DocumentSnapshot> documentSnapshots = queryDocumentSnapshots.getDocuments();
         ArrayList<Message> messages = new ArrayList<>();
-
-        for(DocumentSnapshot documentSnapshot : documentSnapshots){
-            String text = documentSnapshot.getString("text");
-            Date time = documentSnapshot.getDate("time");
-            String sender = documentSnapshot.getString("sender");
-            messages.add(new Message(text, time, sender));
+        if(documentSnapshots.size() > 0){
+            for(DocumentSnapshot documentSnapshot : documentSnapshots){
+                String text = documentSnapshot.getString("text");
+                Date time = documentSnapshot.getDate("time");
+                String sender = documentSnapshot.getString("sender");
+                messages.add(new Message(text, time, sender));
+            }
+            Log.d(TAG, "snapshot from Firebase" + queryDocumentSnapshots.toString());
+            storeMessagesToLocal(messages);
         }
 
-        storeMessagesToLocal(messages);
+        listenForNewMessages(this, new Date());
     }
 }

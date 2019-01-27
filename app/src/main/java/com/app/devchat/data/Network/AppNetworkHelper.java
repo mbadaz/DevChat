@@ -21,29 +21,30 @@ public class AppNetworkHelper implements NetworkHelper {
 
     public AppNetworkHelper() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.getApp().setAutomaticResourceManagementEnabled(true);
         chatsRef = db.collection("chats");
         usersRef = db.collection("users");
     }
 
     /**
      * Get only new messages from Firebase database newer date than the most recent message in the local database
-     * @param date : Date of the most recent message in the local messages SQL database
      * @param eventListener : Callback method to {@link com.app.devchat.data.AppDataManager}
      */
     @Override
-    public void getNewMessagesFromBackend(Date date, EventListener<QuerySnapshot> eventListener) {
+    public void listenForNewMessages(EventListener<QuerySnapshot> eventListener, Date date) {
 
-        chatsRef.whereGreaterThan("time", date).addSnapshotListener(eventListener);
+        chatsRef.addSnapshotListener(eventListener);
     }
 
     /**
      * Get all messages from Firestore database
      * @param listener : Event callback to {@link com.app.devchat.data.AppDataManager}
+     * @param date : Date of the most recent message in the local messages SQL database
      */
     @Override
-    public void getMessagesFromBackend(OnSuccessListener<QuerySnapshot> listener) {
+    public void getNewMessagesFromBackend(Date date, OnSuccessListener<QuerySnapshot> listener) {
 
-        chatsRef.get().addOnSuccessListener(listener);
+        chatsRef.whereGreaterThan("time", date).get().addOnSuccessListener(listener);
 
     }
 

@@ -13,9 +13,9 @@ import java.util.Date;
  */
 public interface NetworkHelper {
 
-    void getNewMessagesFromBackend(Date date, EventListener<QuerySnapshot> snapshotEventListener);
+    void listenForNewMessages(EventListener<QuerySnapshot> snapshotEventListener, Date date);
 
-    void getMessagesFromBackend(OnSuccessListener<QuerySnapshot> onSuccessListener);
+    void getNewMessagesFromBackend(Date date, OnSuccessListener<QuerySnapshot> onSuccessListener);
 
     void sendMessagesToBackend(ArrayList<Message> messages);
 }
