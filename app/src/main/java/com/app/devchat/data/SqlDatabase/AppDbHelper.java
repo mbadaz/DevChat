@@ -8,6 +8,9 @@ import com.app.devchat.data.Message;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import androidx.lifecycle.LiveData;
 import androidx.paging.DataSource;
 import androidx.paging.LivePagedListBuilder;
@@ -18,12 +21,14 @@ import androidx.room.Room;
  * Api for the app's database functions. Uses the Room Persistence library and the Paging library
  * to load paged data from the SQL database.
  */
+@Singleton
 public class AppDbHelper implements DbHelper {
 
     private static final String DB_NAME = BuildConfig.APPLICATION_ID + ".db";
     private LiveData<PagedList<Message>> messagesList;
     private AppDatabase db;
 
+    @Inject
     public AppDbHelper(Application application) {
 
         //TODO implement proper migration policy

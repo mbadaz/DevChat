@@ -59,7 +59,7 @@ public class ExampleInstrumentedTest {
     @Test
     public void sqlDatabaseTest() throws IllegalAccessException, ClassNotFoundException, InstantiationException {
 
-        MyApp app = (MyApp) InstrumentationRegistry.getInstrumentation().
+        BaseApplication app = (BaseApplication) InstrumentationRegistry.getInstrumentation().
                 getTargetContext().getApplicationContext();
         AppDbHelper appDbHelper = new AppDbHelper(app);
         ArrayList<Message> messages = new ArrayList<>();

@@ -1,13 +1,9 @@
 package com.app.devchat.data;
 
-import android.app.Application;
 import android.util.Log;
 
-import com.app.devchat.data.Network.AppNetworkHelper;
 import com.app.devchat.data.Network.NetworkHelper;
-import com.app.devchat.data.SharedPrefs.AppPreferenceHelper;
 import com.app.devchat.data.SharedPrefs.PreferencesHelper;
-import com.app.devchat.data.SqlDatabase.AppDbHelper;
 import com.app.devchat.data.SqlDatabase.DbHelper;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -20,59 +16,35 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import androidx.lifecycle.LiveData;
 import androidx.paging.PagedList;
 
+@Singleton
 public class AppDataManager implements DataManager {
 
     private static final String TAG = AppDataManager.class.getSimpleName();
-    private static AppDataManager dataManager = null;
     private PreferencesHelper preferencesHelper;
     private DbHelper dbHelper;
     private NetworkHelper networkHelper;
     public String userName;
 
-    public LiveData<PagedList<Message>> liveMessages;
+    @Inject
+    public AppDataManager(PreferencesHelper preferencesHelper,
+                           DbHelper dbHelper, NetworkHelper networkHelper){
 
-    private AppDataManager(Application context){
-
-        preferencesHelper = new AppPreferenceHelper(context);
-        dbHelper = new AppDbHelper(context);
-        networkHelper = new AppNetworkHelper();
-        loadData();
-    }
-
-    public static AppDataManager getInstace(Application context){
-        if (dataManager == null){
-            dataManager = new AppDataManager(context);
-            return dataManager;
-        }else {
-            return dataManager;
-        }
-    }
-
-    public void loadData() {
-        liveMessages = getMessagesFromLocal();
-        userName = getUserName();
-    }
-
-    public void getNewMessages(Date date){
-        getNewMessagesFromBackend(date, this);
-    }
-
-    public void sendNewMessage(String text){
-        ArrayList<Message> messages = new ArrayList<>();
-        messages.add(new Message(text, new Date(), userName));
-        storeMessagesToLocal(messages);
-        sendMessagesToBackend(messages);
+        this.preferencesHelper = preferencesHelper;
+        this.dbHelper = dbHelper;
+        this.networkHelper = networkHelper;
     }
 
     // ********* Firebase database access methods **********************
 
     @Override
-    public void listenForNewMessages(EventListener<QuerySnapshot> eventListener, Date date) {
-        networkHelper.listenForNewMessages(eventListener, date);
+    public void listenForNewMessages(EventListener<QuerySnapshot> eventListener) {
+        networkHelper.listenForNewMessages(eventListener);
     }
 
     @Override
@@ -150,14 +122,14 @@ public class AppDataManager implements DataManager {
 
     /**
      * Listener for listening for realtime new messages snapshots from Firebase database.
-     * Is passed to {@link #listenForNewMessages(EventListener, Date)}
+     * Is passed to {@link #listenForNewMessages(EventListener)}
      * @param queryDocumentSnapshots Document snapshots received from Firebase
      * @param e
      */
     @Override
     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
         if(!queryDocumentSnapshots.getMetadata().isFromCache()){
-
+            // if the query snapshot
             if(e == null && queryDocumentSnapshots != null){
                 List<DocumentSnapshot> documentSnapshots = queryDocumentSnapshots.getDocuments();
                 ArrayList<Message> newMessages = new ArrayList<>();
@@ -179,6 +151,7 @@ public class AppDataManager implements DataManager {
             }else {
                 Log.e(TAG, e.getMessage());
             }
+
         }
 
     }
@@ -203,6 +176,6 @@ public class AppDataManager implements DataManager {
             storeMessagesToLocal(messages);
         }
 
-        listenForNewMessages(this, new Date());
+        listenForNewMessages(this);
     }
 }

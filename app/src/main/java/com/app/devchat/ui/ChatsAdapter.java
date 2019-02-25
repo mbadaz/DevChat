@@ -1,4 +1,4 @@
-package com.app.devchat.chat;
+package com.app.devchat.ui;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
@@ -101,15 +102,16 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
 
         long diffMillis = (today.getTimeInMillis() - date.getTime());
         long diff = TimeUnit.DAYS.convert(diffMillis, java.util.concurrent.TimeUnit.MILLISECONDS);
+
         if(diffMillis < 0){
-            time = new SimpleDateFormat("HH:mm");
+            time = new SimpleDateFormat("HH:mm", Locale.getDefault());
             return time.format(date);
         }else if(Math.abs(diff) > 7){
-            fullDate = new SimpleDateFormat("dd MMM");
+            fullDate = new SimpleDateFormat("dd MMM", Locale.getDefault());
             return fullDate.format(date);
         }else {
-            time = new SimpleDateFormat("HH:mm");
-            day = new SimpleDateFormat("E");
+            time = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            day = new SimpleDateFormat("E", Locale.getDefault());
             return day.format(date) + " " + time.format(date);
         }
     }

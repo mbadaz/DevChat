@@ -10,10 +10,13 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.inject.Singleton;
+
 /**
  * Api for accessing the Firebase realtime database
  */
 
+@Singleton
 public class AppNetworkHelper implements NetworkHelper {
 
     private final CollectionReference chatsRef;
@@ -31,7 +34,7 @@ public class AppNetworkHelper implements NetworkHelper {
      * @param eventListener : Callback method to {@link com.app.devchat.data.AppDataManager}
      */
     @Override
-    public void listenForNewMessages(EventListener<QuerySnapshot> eventListener, Date date) {
+    public void listenForNewMessages(EventListener<QuerySnapshot> eventListener) {
 
         chatsRef.addSnapshotListener(eventListener);
     }

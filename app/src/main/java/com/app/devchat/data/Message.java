@@ -45,6 +45,6 @@ public class Message {
     @Override
     public boolean equals(Object obj) {
         Message message = (Message) obj;
-        return message.text.equals(text) && message.time == time;
+        return message.id == id;
     }
 }

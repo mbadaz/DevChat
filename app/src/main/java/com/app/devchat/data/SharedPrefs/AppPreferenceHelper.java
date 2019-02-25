@@ -6,10 +6,13 @@ import android.content.SharedPreferences;
 import com.app.devchat.BuildConfig;
 import com.app.devchat.data.DataManager;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Handles saving and getting data from the app's Shared Preferences storage.
  */
-
+@Singleton
 public class AppPreferenceHelper implements PreferencesHelper {
     private static final String USER_INFO_PREFERENCE_FILE_KEY = BuildConfig.APPLICATION_ID + ".user_info";
     private static final String KEY_USERNAME = "username";
@@ -22,6 +25,7 @@ public class AppPreferenceHelper implements PreferencesHelper {
 
     private SharedPreferences mSharedPrefs;
 
+    @Inject
     public AppPreferenceHelper(Context context) {
         mSharedPrefs = context.getSharedPreferences(USER_INFO_PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
     }
