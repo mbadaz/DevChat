@@ -1,4 +1,4 @@
-package com.app.devchat.ui;
+package com.app.devchat;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
@@ -13,6 +13,10 @@ import android.net.Uri;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
+
+import android.graphics.Color;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 
 /**
  * Helper class for showing and canceling new message
@@ -50,6 +54,10 @@ public class NewMessageNotification {
         // TODO: Remove this if your notification has no relevant thumbnail.
         final Bitmap picture = BitmapFactory.decodeResource(res, R.drawable.example_picture);
 
+        final SpannableStringBuilder exampleItem = new SpannableStringBuilder();
+        exampleItem.append("Dummy");
+        exampleItem.setSpan(new ForegroundColorSpan(Color.WHITE), 0, exampleItem.length(), 0);
+        exampleItem.append("   Example content");
 
         final String ticker = exampleString;
         final String title = res.getString(
@@ -57,7 +65,7 @@ public class NewMessageNotification {
         final String text = res.getString(
                 R.string.new_message_notification_placeholder_text_template, exampleString);
 
-        final Notification.Builder builder = new Notification.Builder(context)
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
 
                 // Set appropriate defaults for the notification light, sound,
                 // and vibration.
@@ -103,6 +111,36 @@ public class NewMessageNotification {
                                 0,
                                 new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.google.com")),
                                 PendingIntent.FLAG_UPDATE_CURRENT))
+
+                // Show an expanded list of items on devices running Android 4.1
+                // or later.
+                .setStyle(new NotificationCompat.InboxStyle()
+                        .addLine(exampleItem)
+                        .addLine(exampleItem)
+                        .addLine(exampleItem)
+                        .addLine(exampleItem)
+                        .setBigContentTitle(title)
+                        .setSummaryText("Dummy summary text"))
+
+                // Example additional actions for this notification. These will
+                // only show on devices running Android 4.1 or later, so you
+                // should ensure that the activity in this notification's
+                // content intent provides access to the same actions in
+                // another way.
+                .addAction(
+                        R.drawable.ic_action_stat_share,
+                        res.getString(R.string.action_share),
+                        PendingIntent.getActivity(
+                                context,
+                                0,
+                                Intent.createChooser(new Intent(Intent.ACTION_SEND)
+                                        .setType("text/plain")
+                                        .putExtra(Intent.EXTRA_TEXT, "Dummy text"), "Dummy title"),
+                                PendingIntent.FLAG_UPDATE_CURRENT))
+                .addAction(
+                        R.drawable.ic_action_stat_reply,
+                        res.getString(R.string.action_reply),
+                        null)
 
                 // Automatically dismiss the notification when it is touched.
                 .setAutoCancel(true);
