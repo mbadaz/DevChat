@@ -13,7 +13,7 @@ import java.util.Date;
  */
 public interface NetworkHelper {
 
-    void listenForNewMessages(EventListener<QuerySnapshot> snapshotEventListener);
+    void listenForNewMessages(EventListener<QuerySnapshot> snapshotEventListener, Date date);
 
     void getNewMessagesFromBackend(Date date, OnSuccessListener<QuerySnapshot> onSuccessListener);
 

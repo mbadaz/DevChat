@@ -1,7 +1,10 @@
 package com.app.devchat.ui;
 
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -9,13 +12,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.app.devchat.BaseApplication;
+import com.app.devchat.BuildConfig;
+import com.app.devchat.NewMessageNotification;
 import com.app.devchat.R;
 
 import javax.inject.Inject;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
@@ -25,6 +28,7 @@ import butterknife.OnClick;
 public class ChatActivity extends AppCompatActivity {
 
     static final String TAG = ChatActivity.class.getSimpleName();
+    static final String CHANNEL_ID = BuildConfig.APPLICATION_ID;
 
     @Inject
     ChatActivityViewModel viewModel;
@@ -50,36 +54,36 @@ public class ChatActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        createNotificationChannel();
+
         handler = new Handler(Looper.getMainLooper());
-
         imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-
-
         
         ChatsAdapter adapter = new ChatsAdapter(this, viewModel.userName);
         layoutManager = new LinearLayoutManager(this);
         layoutManager.setReverseLayout(true);
-        //layoutManager.setStackFromEnd(true);
         layoutManager.setSmoothScrollbarEnabled(true);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         recyclerView.setHasFixedSize(true);
 
+        viewModel.initializeData();
+
         viewModel.liveMessages.observe(this, messages -> {
             adapter.submitList(messages);
             handler.postDelayed(() -> layoutManager.scrollToPositionWithOffset(0, 8), 100);
-
-            if(messages.size() > 1){
-                // get messages from backend with newer date than than the last message in database
-                viewModel.getNewMessages(messages.get(0).getTime());
-
-            }else {
-                // if no messages in database listen for new messages from backend
-                viewModel.listenForNewMessages();
-            }
         });
 
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //Clear any notifications
+        NewMessageNotification.cancel(this);
+    }
+
+
 
     @OnClick(R.id.send_button)
     void sendMessage(){
@@ -93,4 +97,23 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
 }
+
+

@@ -17,4 +17,7 @@
 
     <string name="action_share">Share</string>
     <string name="action_reply">Reply</string>
+
+    <string name="channel_name">@string/app_name</string>
+    <string name="channel_description">New message notifications</string>
 </resources>

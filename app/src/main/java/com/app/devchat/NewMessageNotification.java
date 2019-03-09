@@ -3,20 +3,15 @@ package com.app.devchat;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Build;
 
-import androidx.core.app.NotificationCompat;
+import com.app.devchat.data.Message;
 
-import android.graphics.Color;
-import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
+import java.util.ArrayList;
+
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.Person;
 
 /**
  * Helper class for showing and canceling new message
@@ -46,106 +41,28 @@ public class NewMessageNotification {
      *
      * @see #cancel(Context)
      */
-    public static void notify(final Context context,
-                              final String exampleString, final int number) {
-        final Resources res = context.getResources();
+    public static void notify(final Context context, ArrayList<Message> newMessages) {
 
-        // This image is used as the notification's large icon (thumbnail).
-        // TODO: Remove this if your notification has no relevant thumbnail.
-        final Bitmap picture = BitmapFactory.decodeResource(res, R.drawable.example_picture);
 
-        final SpannableStringBuilder exampleItem = new SpannableStringBuilder();
-        exampleItem.append("Dummy");
-        exampleItem.setSpan(new ForegroundColorSpan(Color.WHITE), 0, exampleItem.length(), 0);
-        exampleItem.append("   Example content");
+        NotificationCompat.MessagingStyle messageStyle = new NotificationCompat.MessagingStyle("");
+        for(Message message : newMessages){
+            Person sender = new Person.Builder().setName(message.getSender()).build();
+            messageStyle.addMessage(message.getText(), message.getTime().getTime(), sender);
+        }
 
-        final String ticker = exampleString;
-        final String title = res.getString(
-                R.string.new_message_notification_title_template, exampleString);
-        final String text = res.getString(
-                R.string.new_message_notification_placeholder_text_template, exampleString);
+        final NotificationCompat.Builder builder;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            builder = new NotificationCompat.Builder(context, BuildConfig.APPLICATION_ID);
+        } else {
+            builder = new NotificationCompat.Builder(context, null);
+        }
 
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-
-                // Set appropriate defaults for the notification light, sound,
-                // and vibration.
-                .setDefaults(Notification.DEFAULT_ALL)
-
-                // Set required fields, including the small icon, the
-                // notification title, and text.
-                .setSmallIcon(R.drawable.ic_stat_new_message)
-                .setContentTitle(title)
-                .setContentText(text)
-
-                // All fields below this line are optional.
-
-                // Use a default priority (recognized on devices running Android
-                // 4.1 or later)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-                // Provide a large icon, shown with the notification in the
-                // notification drawer on devices running Android 3.0 or later.
-                .setLargeIcon(picture)
-
-                // Set ticker text (preview) information for this notification.
-                .setTicker(ticker)
-
-                // Show a number. This is useful when stacking notifications of
-                // a single type.
-                .setNumber(number)
-
-                // If this notification relates to a past or upcoming event, you
-                // should set the relevant time information using the setWhen
-                // method below. If this call is omitted, the notification's
-                // timestamp will by set to the time at which it was shown.
-                // TODO: Call setWhen if this notification relates to a past or
-                // upcoming event. The sole argument to this method should be
-                // the notification timestamp in milliseconds.
-                //.setWhen(...)
-
-                // Set the pending intent to be initiated when the user touches
-                // the notification.
-                .setContentIntent(
-                        PendingIntent.getActivity(
-                                context,
-                                0,
-                                new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.google.com")),
-                                PendingIntent.FLAG_UPDATE_CURRENT))
-
-                // Show an expanded list of items on devices running Android 4.1
-                // or later.
-                .setStyle(new NotificationCompat.InboxStyle()
-                        .addLine(exampleItem)
-                        .addLine(exampleItem)
-                        .addLine(exampleItem)
-                        .addLine(exampleItem)
-                        .setBigContentTitle(title)
-                        .setSummaryText("Dummy summary text"))
-
-                // Example additional actions for this notification. These will
-                // only show on devices running Android 4.1 or later, so you
-                // should ensure that the activity in this notification's
-                // content intent provides access to the same actions in
-                // another way.
-                .addAction(
-                        R.drawable.ic_action_stat_share,
-                        res.getString(R.string.action_share),
-                        PendingIntent.getActivity(
-                                context,
-                                0,
-                                Intent.createChooser(new Intent(Intent.ACTION_SEND)
-                                        .setType("text/plain")
-                                        .putExtra(Intent.EXTRA_TEXT, "Dummy text"), "Dummy title"),
-                                PendingIntent.FLAG_UPDATE_CURRENT))
-                .addAction(
-                        R.drawable.ic_action_stat_reply,
-                        res.getString(R.string.action_reply),
-                        null)
-
-                // Automatically dismiss the notification when it is touched.
-                .setAutoCancel(true);
+        builder.setStyle(messageStyle).
+        setSmallIcon(com.app.devchat.R.drawable.ic_stat_new_message).
+        setNumber(newMessages.size());
 
         notify(context, builder.build());
+
     }
 
     @TargetApi(Build.VERSION_CODES.ECLAIR)
@@ -161,7 +78,7 @@ public class NewMessageNotification {
 
     /**
      * Cancels any notifications of this type previously shown using
-     * {@link #notify(Context, String, int)}.
+     * {notify(Context, String, int)}.
      */
     @TargetApi(Build.VERSION_CODES.ECLAIR)
     public static void cancel(final Context context) {

@@ -34,9 +34,9 @@ public class AppNetworkHelper implements NetworkHelper {
      * @param eventListener : Callback method to {@link com.app.devchat.data.AppDataManager}
      */
     @Override
-    public void listenForNewMessages(EventListener<QuerySnapshot> eventListener) {
+    public void listenForNewMessages(EventListener<QuerySnapshot> eventListener, Date date) {
+        chatsRef.whereGreaterThan("time", date).addSnapshotListener(eventListener);
 
-        chatsRef.addSnapshotListener(eventListener);
     }
 
     /**

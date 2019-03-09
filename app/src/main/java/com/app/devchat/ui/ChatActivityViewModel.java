@@ -20,7 +20,6 @@ public class ChatActivityViewModel extends AndroidViewModel {
 
     DataManager dataManager;
     LiveData<PagedList<Message>> liveMessages;
-    private boolean hasDoneInitialLoad = false;
     String userName;
 
     @Inject
@@ -31,9 +30,12 @@ public class ChatActivityViewModel extends AndroidViewModel {
         userName = dataManager.getUserName();
     }
 
-    public AndroidViewModel setDataManager(DataManager dataManager){
-        this.dataManager = dataManager;
-        return this;
+    void initializeData(){
+        if(liveMessages.getValue() != null){
+            getNewMessages(liveMessages.getValue().get(0).getTime());
+        }else {
+            listenForNewMessages(new Date());
+        }
     }
 
     void sendMessage(String text){
@@ -44,13 +46,10 @@ public class ChatActivityViewModel extends AndroidViewModel {
     }
 
     void getNewMessages(Date date){
-        if (!hasDoneInitialLoad){
-            dataManager.getNewMessagesFromBackend(date, dataManager);
-            hasDoneInitialLoad = true;
-        }
+        dataManager.getNewMessagesFromBackend(date, dataManager);
     }
 
-    void listenForNewMessages(){
-        dataManager.listenForNewMessages(dataManager);
+    void listenForNewMessages(Date date){
+        dataManager.listenForNewMessages(dataManager, date);
     }
 }

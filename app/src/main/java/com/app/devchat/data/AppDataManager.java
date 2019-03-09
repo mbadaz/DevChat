@@ -1,7 +1,9 @@
 package com.app.devchat.data;
 
+import android.app.Application;
 import android.util.Log;
 
+import com.app.devchat.NewMessageNotification;
 import com.app.devchat.data.Network.NetworkHelper;
 import com.app.devchat.data.SharedPrefs.PreferencesHelper;
 import com.app.devchat.data.SqlDatabase.DbHelper;
@@ -30,21 +32,25 @@ public class AppDataManager implements DataManager {
     private DbHelper dbHelper;
     private NetworkHelper networkHelper;
     public String userName;
+    private Application application;
+
 
     @Inject
     public AppDataManager(PreferencesHelper preferencesHelper,
-                           DbHelper dbHelper, NetworkHelper networkHelper){
+                           DbHelper dbHelper, NetworkHelper networkHelper, Application application){
 
         this.preferencesHelper = preferencesHelper;
         this.dbHelper = dbHelper;
         this.networkHelper = networkHelper;
+        this.application = application;
     }
+
 
     // ********* Firebase database access methods **********************
 
     @Override
-    public void listenForNewMessages(EventListener<QuerySnapshot> eventListener) {
-        networkHelper.listenForNewMessages(eventListener);
+    public void listenForNewMessages(EventListener<QuerySnapshot> eventListener, Date date) {
+        networkHelper.listenForNewMessages(eventListener, date);
     }
 
     @Override
@@ -102,7 +108,6 @@ public class AppDataManager implements DataManager {
 
 
     // ************* Local database access methods **************
-
     @Override
     public LiveData<PagedList<Message>> getMessagesFromLocal() {
         return dbHelper.getMessagesFromLocal();
@@ -122,7 +127,7 @@ public class AppDataManager implements DataManager {
 
     /**
      * Listener for listening for realtime new messages snapshots from Firebase database.
-     * Is passed to {@link #listenForNewMessages(EventListener)}
+     * Is passed to {@link #listenForNewMessages(EventListener, Date)}
      * @param queryDocumentSnapshots Document snapshots received from Firebase
      * @param e
      */
@@ -146,6 +151,7 @@ public class AppDataManager implements DataManager {
                     }
 
                     storeMessagesToLocal(newMessages);
+                    NewMessageNotification.notify(application, newMessages);
                 }
                 Log.d(TAG, "snapshot from Firebase" + queryDocumentSnapshots.toString());
             }else {
@@ -174,8 +180,9 @@ public class AppDataManager implements DataManager {
             }
             Log.d(TAG, "snapshot from Firebase" + queryDocumentSnapshots.toString());
             storeMessagesToLocal(messages);
+            NewMessageNotification.notify(application,messages);
         }
-
-        listenForNewMessages(this);
+        //Reset the listener with date of the latest message received
+        listenForNewMessages(this, messages.get(messages.size()-1).getTime());
     }
 }
