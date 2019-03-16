@@ -16,6 +16,8 @@ import com.app.devchat.BuildConfig;
 import com.app.devchat.NewMessageNotification;
 import com.app.devchat.R;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -59,7 +61,7 @@ public class ChatActivity extends AppCompatActivity {
         handler = new Handler(Looper.getMainLooper());
         imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         
-        ChatsAdapter adapter = new ChatsAdapter(this, viewModel.userName);
+        ChatsAdapter adapter = new ChatsAdapter(this, viewModel.getUserName());
         layoutManager = new LinearLayoutManager(this);
         layoutManager.setReverseLayout(true);
         layoutManager.setSmoothScrollbarEnabled(true);
@@ -68,11 +70,17 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
 
         viewModel.initializeData();
-
         viewModel.liveMessages.observe(this, messages -> {
             adapter.submitList(messages);
             handler.postDelayed(() -> layoutManager.scrollToPositionWithOffset(0, 8), 100);
+            if(!viewModel.hasDoneIntialLoad && !messages.isEmpty()){
+                viewModel.getNewMessages(messages.get(0).getTime());
+            }else if(!viewModel.hasDoneIntialLoad && messages.isEmpty()){
+                viewModel.getNewMessages(new Date());
+            }
         });
+
+
 
     }
 

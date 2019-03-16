@@ -1,21 +1,23 @@
 package com.app.devchat.data.Network;
 
 import com.app.devchat.data.Message;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.app.devchat.data.NewMessagesCallback;
 
 import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Provides the methods contract for interacting with the {@link AppNetworkHelper}
+ * Provides the methods contract for interacting with the {@link FireBaseAPI}
  */
 public interface NetworkHelper {
 
-    void listenForNewMessages(EventListener<QuerySnapshot> snapshotEventListener, Date date);
+    void listenForNewMessages(Date date);
 
-    void getNewMessagesFromBackend(Date date, OnSuccessListener<QuerySnapshot> onSuccessListener);
+    void getNewMessagesFromBackendDatabase(Date date);
 
-    void sendMessagesToBackend(ArrayList<Message> messages);
+    void sendMessagesToBackendDatabase(ArrayList<Message> messages);
+
+    void setNewMessagesCallBack(NewMessagesCallback callBack);
+
+    void setUserName(String userName);
 }

@@ -22,14 +22,14 @@ import androidx.room.Room;
  * to load paged data from the SQL database.
  */
 @Singleton
-public class AppDbHelper implements DbHelper {
+public class SQLiteDatabase implements LocalDatabase {
 
     private static final String DB_NAME = BuildConfig.APPLICATION_ID + ".db";
     private LiveData<PagedList<Message>> messagesList;
     private AppDatabase db;
 
     @Inject
-    public AppDbHelper(Application application) {
+    public SQLiteDatabase(Application application) {
 
         //TODO implement proper migration policy
         db = Room.databaseBuilder(application, AppDatabase.class, DB_NAME).
@@ -45,12 +45,12 @@ public class AppDbHelper implements DbHelper {
     }
 
     @Override
-    public LiveData<PagedList<Message>> getMessagesFromLocal() {
+    public LiveData<PagedList<Message>> getMessagesFromLocalDatabase() {
         return messagesList;
     }
 
     @Override
-    public void storeMessagesToLocal(ArrayList<Message> messages) {
+    public void storeMessagesToLocalDatabase(ArrayList<Message> messages) {
         SaveMessagesTask task = new SaveMessagesTask(db.messageDAO(), messages);
         task.execute();
     }

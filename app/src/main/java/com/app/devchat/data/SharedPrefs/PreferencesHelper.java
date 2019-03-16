@@ -1,6 +1,6 @@
 package com.app.devchat.data.SharedPrefs;
 
-import com.app.devchat.data.DataManager;
+import com.app.devchat.data.LoginMode;
 
 /**
  * Exposes the app's Shared Preference API and should be implemented by any class that wants to
@@ -11,7 +11,7 @@ import com.app.devchat.data.DataManager;
 public interface PreferencesHelper {
 
     int getLoginStatus();
-    void setLoginStatus(DataManager.LoginMode loginMode);
+    void setLoginStatus(LoginMode loginMode);
 
     String getUserName();
     void setUserName(String value);

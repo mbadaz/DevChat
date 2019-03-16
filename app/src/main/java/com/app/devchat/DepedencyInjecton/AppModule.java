@@ -5,12 +5,12 @@ import android.content.Context;
 
 import com.app.devchat.data.AppDataManager;
 import com.app.devchat.data.DataManager;
-import com.app.devchat.data.Network.AppNetworkHelper;
+import com.app.devchat.data.Network.FireBaseAPI;
 import com.app.devchat.data.Network.NetworkHelper;
 import com.app.devchat.data.SharedPrefs.AppPreferenceHelper;
 import com.app.devchat.data.SharedPrefs.PreferencesHelper;
-import com.app.devchat.data.SqlDatabase.AppDbHelper;
-import com.app.devchat.data.SqlDatabase.DbHelper;
+import com.app.devchat.data.SqlDatabase.SQLiteDatabase;
+import com.app.devchat.data.SqlDatabase.LocalDatabase;
 
 import javax.inject.Singleton;
 
@@ -41,7 +41,7 @@ public class AppModule {
     @Provides
     @Singleton
     static NetworkHelper provideAppNeworkHelper(){
-        return new AppNetworkHelper();
+        return new FireBaseAPI();
     }
 
     @Provides
@@ -52,7 +52,7 @@ public class AppModule {
 
     @Provides
     @Singleton
-    static DbHelper provideAppDbHelper(AppDbHelper dbHelper){
+    static LocalDatabase provideAppDbHelper(SQLiteDatabase dbHelper){
         return dbHelper;
     }
 

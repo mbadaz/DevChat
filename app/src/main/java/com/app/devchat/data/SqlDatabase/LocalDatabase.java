@@ -13,9 +13,9 @@ import androidx.paging.PagedList;
  * database API
  */
 
-public interface DbHelper {
+public interface LocalDatabase {
 
-    LiveData<PagedList<Message>> getMessagesFromLocal();
+    LiveData<PagedList<Message>> getMessagesFromLocalDatabase();
 
-    void storeMessagesToLocal(ArrayList<Message> messages);
+    void storeMessagesToLocalDatabase(ArrayList<Message> messages);
 }

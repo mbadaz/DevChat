@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.app.devchat.BuildConfig;
-import com.app.devchat.data.DataManager;
+import com.app.devchat.data.LoginMode;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -36,7 +36,7 @@ public class AppPreferenceHelper implements PreferencesHelper {
     }
 
     @Override
-    public void setLoginStatus(DataManager.LoginMode loginMode) {
+    public void setLoginStatus(LoginMode loginMode) {
         mSharedPrefs.edit().putInt(KEY_LOGIN_STATUS, loginMode.getMode()).apply();
     }
 

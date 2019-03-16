@@ -20,36 +20,37 @@ public class ChatActivityViewModel extends AndroidViewModel {
 
     DataManager dataManager;
     LiveData<PagedList<Message>> liveMessages;
-    String userName;
+    boolean hasDoneIntialLoad = false;
 
     @Inject
     public ChatActivityViewModel(@NonNull Application application, DataManager dataManager) {
         super(application);
         this.dataManager = dataManager;
-        liveMessages = dataManager.getMessagesFromLocal();
-        userName = dataManager.getUserName();
     }
 
     void initializeData(){
-        if(liveMessages.getValue() != null){
-            getNewMessages(liveMessages.getValue().get(0).getTime());
-        }else {
-            listenForNewMessages(new Date());
-        }
+        liveMessages = dataManager.getMessagesFromLocalDatabase();
     }
 
     void sendMessage(String text){
         ArrayList<Message> messages = new ArrayList<>();
-        messages.add(new Message(text, new Date(), userName));
-        dataManager.storeMessagesToLocal(messages);
-        dataManager.sendMessagesToBackend(messages);
-    }
-
-    void getNewMessages(Date date){
-        dataManager.getNewMessagesFromBackend(date, dataManager);
+        messages.add(new Message(text, new Date(), dataManager.getUserName()));
+        dataManager.storeMessagesToLocalDatabase(messages);
+        dataManager.sendMessagesToBackendDatabase(messages);
     }
 
     void listenForNewMessages(Date date){
-        dataManager.listenForNewMessages(dataManager, date);
+        dataManager.listenForNewMessages(date);
+    }
+
+    String getUserName(){
+        return dataManager.getUserName();
+    }
+
+    void getNewMessages(Date date){
+        if(!hasDoneIntialLoad){
+            dataManager.getNewMessagesFromBackendDatabase(date);
+            hasDoneIntialLoad = true;
+        }
     }
 }

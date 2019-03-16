@@ -9,6 +9,7 @@ import android.os.Build;
 import com.app.devchat.data.Message;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.Person;
@@ -43,12 +44,14 @@ public class NewMessageNotification {
      */
     public static void notify(final Context context, ArrayList<Message> newMessages) {
 
-
         NotificationCompat.MessagingStyle messageStyle = new NotificationCompat.MessagingStyle("");
         for(Message message : newMessages){
             Person sender = new Person.Builder().setName(message.getSender()).build();
             messageStyle.addMessage(message.getText(), message.getTime().getTime(), sender);
         }
+        String notificationTitle = messageStyle.getMessages().size() + " new messages";
+        messageStyle.setGroupConversation(true);
+        messageStyle.setConversationTitle(notificationTitle);
 
         final NotificationCompat.Builder builder;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -59,7 +62,9 @@ public class NewMessageNotification {
 
         builder.setStyle(messageStyle).
         setSmallIcon(com.app.devchat.R.drawable.ic_stat_new_message).
-        setNumber(newMessages.size());
+        setNumber(newMessages.size()).
+                setAutoCancel(true).
+                setNumber(messageStyle.getMessages().size());
 
         notify(context, builder.build());
 
@@ -74,6 +79,7 @@ public class NewMessageNotification {
         } else {
             nm.notify(NOTIFICATION_TAG.hashCode(), notification);
         }
+
     }
 
     /**

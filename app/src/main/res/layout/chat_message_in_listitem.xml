@@ -11,11 +11,13 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="@dimen/dimen_chat_bubble_side_margin"
         android:layout_marginRight="@dimen/dimen_chat_bubble_side_margin"
-        android:background="@drawable/in_bubble">
+        android:background="@drawable/in_bubble"
+        android:padding="4dp">
 
         <TextView
             android:id="@+id/in_message_sender"
@@ -63,9 +65,11 @@
         android:layout_alignParentRight="true"
         android:layout_marginStart="@dimen/dimen_chat_bubble_side_margin"
         android:layout_marginLeft="@dimen/dimen_chat_bubble_side_margin"
-        android:layout_marginTop="4dp"
-        android:layout_marginRight="8dp"
-        android:background="@drawable/out_bubble">
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/out_bubble"
+        android:padding="4dp">
 
         <TextView
             android:id="@+id/out_message_sender"
@@ -96,7 +100,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/out_message_text"
             android:layout_marginRight="16dp"
-            android:layout_marginBottom="4dp"
+            android:layout_marginBottom="0dp"
             android:layout_toEndOf="@id/out_message_text"
             android:layout_toRightOf="@id/out_message_text"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"

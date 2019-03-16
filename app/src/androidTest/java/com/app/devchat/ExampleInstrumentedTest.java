@@ -5,9 +5,9 @@ import android.content.Context;
 
 import com.app.devchat.data.DataManager;
 import com.app.devchat.data.Message;
-import com.app.devchat.data.Network.AppNetworkHelper;
+import com.app.devchat.data.Network.FireBaseAPI;
 import com.app.devchat.data.SharedPrefs.AppPreferenceHelper;
-import com.app.devchat.data.SqlDatabase.AppDbHelper;
+import com.app.devchat.data.SqlDatabase.SQLiteDatabase;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -61,20 +61,20 @@ public class ExampleInstrumentedTest {
 
         BaseApplication app = (BaseApplication) InstrumentationRegistry.getInstrumentation().
                 getTargetContext().getApplicationContext();
-        AppDbHelper appDbHelper = new AppDbHelper(app);
+        SQLiteDatabase appDbHelper = new SQLiteDatabase(app);
         ArrayList<Message> messages = new ArrayList<>();
         messages.add(new Message("message 1", new Date(), ""));
         messages.add(new Message("message 2", new Date(), ""));
         messages.add(new Message("message 3", new Date(), ""));
 
-        appDbHelper.storeMessagesToLocal(messages);
+        appDbHelper.storeMessagesToLocalDatabase(messages);
 
-        assertNotNull(appDbHelper.getMessagesFromLocal().getValue());
+        assertNotNull(appDbHelper.getMessagesFromLocalDatabase().getValue());
     }
 
     @Test
     public void firebaseDatabaseTest(){
-        AppNetworkHelper networkHelper = new AppNetworkHelper();
+        FireBaseAPI networkHelper = new FireBaseAPI();
 
         /**
         ArrayList<Message> messages = new ArrayList<>();
