@@ -3,9 +3,7 @@ package com.app.devchat.data.SharedPrefs;
 import com.app.devchat.data.LoginMode;
 
 /**
- * Exposes the app's Shared Preference API and should be implemented by any class that wants to
- * perform actions on the app's Shared Preferences or extended by any interface that also
- * wants to expose the app's Shared Preferences API
+ * Interface that exposes methods for interacting with the app's shared preferences
  */
 
 public interface PreferencesHelper {

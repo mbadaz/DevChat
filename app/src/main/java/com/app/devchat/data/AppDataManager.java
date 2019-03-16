@@ -132,7 +132,7 @@ public class AppDataManager implements DataManager {
     }
 
     @Override
-    public void updateUserInfo(String username, String userEmail,LoginMode loginMode) {
+    public void updateUserInfo(String username, String userEmail, LoginMode loginMode) {
         setUserName(username);
         setUserEmail(userEmail);
         setLoginStatus(loginMode);

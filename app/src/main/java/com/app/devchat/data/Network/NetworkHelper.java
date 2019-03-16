@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Provides the methods contract for interacting with the {@link FireBaseAPI}
+ * Interface which provides methods for interacting with the app's network data source API.
+ * Every class that wants to act as the app's network data source API must implement this interface
  */
 public interface NetworkHelper {
 
