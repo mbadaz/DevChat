@@ -25,7 +25,7 @@ public class NewMessageNotification {
     /**
      * The unique identifier for this type of notification.
      */
-    private static final String NOTIFICATION_TAG = "NewMessage";
+    private static final String NOTIFICATION_TAG = BuildConfig.APPLICATION_ID;
 
     /**
      * Shows the notification, or updates a previously shown notification of
@@ -75,7 +75,7 @@ public class NewMessageNotification {
         final NotificationManager nm = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR) {
-            nm.notify(NOTIFICATION_TAG, 0, notification);
+            nm.notify(NOTIFICATION_TAG, 876, notification);
         } else {
             nm.notify(NOTIFICATION_TAG.hashCode(), notification);
         }
@@ -90,8 +90,9 @@ public class NewMessageNotification {
     public static void cancel(final Context context) {
         final NotificationManager nm = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR) {
-            nm.cancel(NOTIFICATION_TAG, 0);
+            nm.cancel(NOTIFICATION_TAG, 876);
         } else {
             nm.cancel(NOTIFICATION_TAG.hashCode());
         }

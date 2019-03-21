@@ -75,8 +75,11 @@ public class ChatActivity extends AppCompatActivity {
             handler.postDelayed(() -> layoutManager.scrollToPositionWithOffset(0, 8), 100);
             if(!viewModel.hasDoneIntialLoad && !messages.isEmpty()){
                 viewModel.getNewMessages(messages.get(0).getTime());
+                viewModel.listenForNewMessages(messages.get(0).getTime());
             }else if(!viewModel.hasDoneIntialLoad && messages.isEmpty()){
                 viewModel.getNewMessages(new Date());
+            }else {
+                viewModel.listenForNewMessages(messages.get(0).getTime());
             }
         });
 
@@ -115,6 +118,7 @@ public class ChatActivity extends AppCompatActivity {
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
+            channel.shouldVibrate();
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);

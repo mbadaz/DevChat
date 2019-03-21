@@ -17,8 +17,6 @@ public class AppPreferenceHelper implements PreferencesHelper {
     private static final String USER_INFO_PREFERENCE_FILE_KEY = BuildConfig.APPLICATION_ID + ".user_info";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_LOGIN_STATUS = "login_status";
-    int LOGGED_IN = 1;
-    int LOGGED_OUT = 0;
     private static final String KEY_USER_EMAIL = "user_email";
     private static final String KEY_USER_STATUS = "user_status";
 
@@ -42,7 +40,7 @@ public class AppPreferenceHelper implements PreferencesHelper {
 
     @Override
     public String getUserName() {
-        return mSharedPrefs.getString(KEY_USERNAME, "phone");
+        return mSharedPrefs.getString(KEY_USERNAME, "emulator");
     }
 
     @Override

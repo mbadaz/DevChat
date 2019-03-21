@@ -38,10 +38,11 @@ public class AppDataManager implements DataManager {
         this.dbHelper = dbHelper;
         this.networkHelper = networkHelper;
         setNewMessagesCallBack(this);
-        networkHelper.setUserName(getUserName());
         this.application = application;
 
         loadData();
+
+        networkHelper.setUserName(getUserName());
     }
 
     private void loadData() {
