@@ -30,6 +30,10 @@ public class AppDataManager implements DataManager {
 
     private Application application;
 
+    private static DataManager dataManager;
+
+
+
     @Inject
     public AppDataManager(PreferencesHelper preferencesHelper,
                           LocalDatabase dbHelper, NetworkHelper networkHelper, Application application){
@@ -50,6 +54,11 @@ public class AppDataManager implements DataManager {
         userName =  preferencesHelper.getUserName();
         userEmail = preferencesHelper.getUserEmail();
         userStatus = preferencesHelper.getUserStatus();
+        dataManager = this;
+    }
+
+    public static DataManager getInstance(){
+        return dataManager;
     }
 
 

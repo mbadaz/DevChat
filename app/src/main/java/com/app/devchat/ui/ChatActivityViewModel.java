@@ -39,7 +39,7 @@ public class ChatActivityViewModel extends AndroidViewModel {
         dataManager.sendMessagesToBackendDatabase(messages);
     }
 
-    void listenForNewMessages(Date date){
+    public void listenForNewMessages(Date date){
         dataManager.listenForNewMessages(date);
     }
 
@@ -53,4 +53,5 @@ public class ChatActivityViewModel extends AndroidViewModel {
             hasDoneIntialLoad = true;
         }
     }
+
 }

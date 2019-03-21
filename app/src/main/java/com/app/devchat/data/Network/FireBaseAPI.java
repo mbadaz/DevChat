@@ -6,10 +6,13 @@ import android.util.Log;
 import com.app.devchat.data.Message;
 import com.app.devchat.data.NewMessagesCallback;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -27,6 +30,8 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
     private static final String TAG = FireBaseAPI.class.getSimpleName();
     private final CollectionReference chatsRef;
     private final CollectionReference usersRef;
+    private Query realTimeQuery;
+    private ListenerRegistration listenerRegistration;
     private static NewMessagesCallback newMessagesCallback;
     private static String userName;
 
@@ -37,16 +42,18 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
         usersRef = db.collection("users");
     }
 
-
-
     /**
      * Get only new messages from Firebase database newer date than the most recent message in the local database
      */
     @Override
     public void listenForNewMessages(Date date) {
-
-        chatsRef.whereGreaterThan("time", date).addSnapshotListener(this);
-
+        if(listenerRegistration == null){
+           listenerRegistration = chatsRef.whereGreaterThan("time", new Timestamp(date)).addSnapshotListener(this);
+        }else{
+            // Replace old event lister with new one.
+            listenerRegistration.remove();
+            listenerRegistration = chatsRef.whereGreaterThan("time", new Timestamp(date)).addSnapshotListener(this);
+        }
     }
 
     /**
@@ -56,7 +63,7 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
     @Override
     public void getNewMessagesFromBackendDatabase(Date date) {
 
-        chatsRef.whereGreaterThan("time", date).get().addOnSuccessListener(this);
+        chatsRef.whereGreaterThan("time", new Timestamp(date)).get().addOnSuccessListener(this);
 
     }
 
@@ -108,14 +115,7 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
 
                 newMessagesCallback.onNewMessages(newMessages);
             }
-            //Reset the listener with date of the latest message received
-            if(!newMessages.isEmpty()){
-                listenForNewMessages(newMessages.get(newMessages.size()-1).getTime());
-                return;
-            }
         }
-        listenForNewMessages(new Date());
-
     }
 
     /**
@@ -132,7 +132,7 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
                 ArrayList<Message> newMessages = (ArrayList) queryDocumentSnapshots.toObjects(Message.class);
 
                 if(e == null && newMessages.size() >  0){
-
+                    // remove messages by this user to prevent duplicate entries in local database
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         newMessages.removeIf(message -> message.getSender().equals(userName));
                     }else {
@@ -143,11 +143,14 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
                         }
                     }
 
-                    newMessagesCallback.onNewMessages(newMessages);
+                    if(!newMessages.isEmpty()){
+                        // Add messages to local database
+                        newMessagesCallback.onNewMessages(newMessages);
+                        return;
+                    }
 
                     Log.d(TAG, "snapshot from Firebase" + queryDocumentSnapshots.getMetadata().toString());
                 }
-
             }
         }else {
             Log.e(TAG, e.getMessage());

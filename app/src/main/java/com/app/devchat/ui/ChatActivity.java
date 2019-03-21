@@ -1,18 +1,24 @@
 package com.app.devchat.ui;
 
 
+import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.StrictMode;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.app.devchat.BaseApplication;
 import com.app.devchat.BuildConfig;
+import com.app.devchat.MessagesJobService;
 import com.app.devchat.NewMessageNotification;
 import com.app.devchat.R;
 
@@ -21,6 +27,7 @@ import java.util.Date;
 import javax.inject.Inject;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModel;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
@@ -31,6 +38,7 @@ public class ChatActivity extends AppCompatActivity {
 
     static final String TAG = ChatActivity.class.getSimpleName();
     static final String CHANNEL_ID = BuildConfig.APPLICATION_ID;
+    public static final int BACKGROUND_MESSAGES_JOB_SCHEDULER_ID = 1;
 
     @Inject
     ChatActivityViewModel viewModel;
@@ -47,6 +55,7 @@ public class ChatActivity extends AppCompatActivity {
     private Handler handler;
 
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +64,8 @@ public class ChatActivity extends AppCompatActivity {
         ((BaseApplication) getApplication()).getComponent().inject(this);
 
         ButterKnife.bind(this);
+
+        enableStrictMode();
 
         createNotificationChannel();
 
@@ -82,16 +93,42 @@ public class ChatActivity extends AppCompatActivity {
                 viewModel.listenForNewMessages(messages.get(0).getTime());
             }
         });
-
-
-
     }
 
+    private void enableStrictMode() {
+        if(BuildConfig.DEBUG){
+            StrictMode.ThreadPolicy threadPolicy = new StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build();
+            StrictMode.setThreadPolicy(threadPolicy);
+        }
+    }
+
+    /**
+     * Dispatch onPause() to fragments.
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    protected void onPause() {
+
+        // Start background messages service
+        ComponentName componentName = new ComponentName(this, MessagesJobService.class);
+        JobInfo jobInfo = new JobInfo.Builder(BACKGROUND_MESSAGES_JOB_SCHEDULER_ID, componentName)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+        jobScheduler.schedule(jobInfo);
+        super.onPause();
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onResume() {
         super.onResume();
         //Clear any notifications
         NewMessageNotification.cancel(this);
+
+        //Cancel the background service
+        JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+        jobScheduler.cancel(BACKGROUND_MESSAGES_JOB_SCHEDULER_ID);
     }
 
 
@@ -124,6 +161,10 @@ public class ChatActivity extends AppCompatActivity {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
+    }
+
+    public ViewModel getViewModel(){
+        return ((ChatActivityViewModel)viewModel);
     }
 
 }
