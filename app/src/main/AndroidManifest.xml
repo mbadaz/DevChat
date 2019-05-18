@@ -3,6 +3,7 @@
     package="com.app.devchat">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".BaseApplication"
@@ -13,14 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.ChatActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".login.LoginActivity">
+        <activity android:name=".chat.ChatActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,13 +22,10 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".MessagesJobService"
+        <receiver
+            android:name=".backgroundMessaging.CheckNewMessagesAlarmReceiver"
             android:enabled="true"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE">
-
-        </service>
+            android:exported="true"></receiver>
     </application>
 
 </manifest>

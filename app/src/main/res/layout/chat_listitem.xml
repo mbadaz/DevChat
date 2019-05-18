@@ -31,11 +31,18 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             tools:text="sender name" />
 
+        <ImageView
+            android:id="@+id/in_message_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/in_message_sender"
+            android:layout_marginLeft="16dp" />
+
         <TextView
             android:id="@+id/in_message_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/in_message_sender"
+            android:layout_below="@+id/in_message_image"
             android:layout_marginStart="16dp"
             android:layout_marginLeft="16dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
@@ -83,13 +90,20 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             tools:text="sender name" />
 
+        <ImageView
+            android:id="@+id/out_message_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/out_message_sender" />
+
         <TextView
             android:id="@+id/out_message_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/out_message_sender"
+            android:layout_below="@+id/out_message_image"
             android:layout_marginStart="4dp"
             android:layout_marginLeft="4dp"
+            android:layout_marginRight="16dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@android:color/black"
             tools:text="@tools:sample/lorem" />

@@ -10,8 +10,6 @@ import com.app.devchat.data.SqlDatabase.LocalDatabase;
  */
 public interface DataManager extends PreferencesHelper, NetworkHelper, LocalDatabase, NewMessagesCallback{
 
-    void updateUserInfo(String username, String userEmail, LoginMode loginMode);
-
-
+    void updateUserInfo(String username, String userEmail, String userPhoto, LoginMode loginMode);
 
 }

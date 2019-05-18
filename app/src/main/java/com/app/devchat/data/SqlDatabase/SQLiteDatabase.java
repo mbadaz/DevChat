@@ -4,7 +4,7 @@ import android.app.Application;
 import android.os.AsyncTask;
 
 import com.app.devchat.BuildConfig;
-import com.app.devchat.data.Message;
+import com.app.devchat.data.DataModels.Message;
 
 import java.util.ArrayList;
 

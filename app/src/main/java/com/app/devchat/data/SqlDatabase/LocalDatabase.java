@@ -1,6 +1,6 @@
 package com.app.devchat.data.SqlDatabase;
 
-import com.app.devchat.data.Message;
+import com.app.devchat.data.DataModels.Message;
 
 import java.util.ArrayList;
 

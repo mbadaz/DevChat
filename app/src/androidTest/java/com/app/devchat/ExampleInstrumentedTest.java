@@ -4,7 +4,7 @@ package com.app.devchat;
 import android.content.Context;
 
 import com.app.devchat.data.DataManager;
-import com.app.devchat.data.Message;
+import com.app.devchat.data.DataModels.Message;
 import com.app.devchat.data.Network.FireBaseAPI;
 import com.app.devchat.data.SharedPrefs.AppPreferenceHelper;
 import com.app.devchat.data.SqlDatabase.SQLiteDatabase;

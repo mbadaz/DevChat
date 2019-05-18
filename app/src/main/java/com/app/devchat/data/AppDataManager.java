@@ -1,8 +1,11 @@
 package com.app.devchat.data;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.app.devchat.NewMessageNotification;
+import com.app.devchat.data.DataModels.Message;
+import com.app.devchat.data.DataModels.User;
 import com.app.devchat.data.Network.NetworkHelper;
 import com.app.devchat.data.SharedPrefs.PreferencesHelper;
 import com.app.devchat.data.SqlDatabase.LocalDatabase;
@@ -16,6 +19,13 @@ import javax.inject.Singleton;
 import androidx.lifecycle.LiveData;
 import androidx.paging.PagedList;
 
+/**
+ * This is the apps {@link DataManager} implementation and handles processing of all the app's
+ * data. For consistency the in the processing of data, AppDataManager regards the local database
+ * i.e {@link com.app.devchat.data.SqlDatabase.SQLiteDatabase} as the app's single source of truth.
+ * This means that the UI only observes the local database for its data and not the remote database.
+ * New messages from the remote database are simply added to the local database and the UI will update accordingly.
+ */
 @Singleton
 public class AppDataManager implements DataManager {
 
@@ -27,9 +37,7 @@ public class AppDataManager implements DataManager {
     private String userEmail;
     private int userLoginStatus;
     private String userStatus;
-
     private Application application;
-
     private static DataManager dataManager;
 
 
@@ -41,7 +49,6 @@ public class AppDataManager implements DataManager {
         this.preferencesHelper = preferencesHelper;
         this.dbHelper = dbHelper;
         this.networkHelper = networkHelper;
-        setNewMessagesCallBack(this);
         this.application = application;
 
         loadData();
@@ -57,6 +64,7 @@ public class AppDataManager implements DataManager {
         dataManager = this;
     }
 
+
     public static DataManager getInstance(){
         return dataManager;
     }
@@ -64,13 +72,13 @@ public class AppDataManager implements DataManager {
 
     // ********* Backend database access methods **********************
     @Override
-    public void listenForNewMessages(Date date) {
-        networkHelper.listenForNewMessages(date);
+    public void listenForNewMessages(Date date, NewMessagesCallback callback) {
+        networkHelper.listenForNewMessages(date,  callback);
     }
 
     @Override
-    public void getNewMessagesFromBackendDatabase(Date date) {
-        networkHelper.getNewMessagesFromBackendDatabase(date);
+    public void getNewMessagesFromBackendDatabase(Date date, NewMessagesCallback callback) {
+        networkHelper.getNewMessagesFromBackendDatabase(date, callback);
     }
 
     @Override
@@ -78,9 +86,10 @@ public class AppDataManager implements DataManager {
         networkHelper.sendMessagesToBackendDatabase(messages);
     }
 
+
     @Override
-    public void setNewMessagesCallBack(NewMessagesCallback callBack){
-        networkHelper.setNewMessagesCallBack(callBack);
+    public void addNewUserToBackEndDatabase(User user) {
+        networkHelper.addNewUserToBackEndDatabase(user);
     }
 
 
@@ -107,6 +116,7 @@ public class AppDataManager implements DataManager {
         userName = value;
     }
 
+
     @Override
     public String getUserEmail() {
         return userEmail;
@@ -129,6 +139,14 @@ public class AppDataManager implements DataManager {
         userStatus = value;
     }
 
+    @Override
+    public void updateUserInfo(String username, String userEmail, String userPhoto, LoginMode loginMode) {
+        setUserName(username);
+        setUserEmail(userEmail);
+        setLoginStatus(loginMode);
+    }
+
+
 
     // ************* Local database access methods **************
     @Override
@@ -141,17 +159,18 @@ public class AppDataManager implements DataManager {
         dbHelper.storeMessagesToLocalDatabase(messages);
     }
 
-    @Override
-    public void updateUserInfo(String username, String userEmail, LoginMode loginMode) {
-        setUserName(username);
-        setUserEmail(userEmail);
-        setLoginStatus(loginMode);
-    }
-
+    /**
+     * New messages callback method
+     * @param messages
+     */
     @Override
     public void onNewMessages(ArrayList<Message> messages) {
         storeMessagesToLocalDatabase(messages);
+        // update new messages listener
+        listenForNewMessages(messages.get(messages.size()-1).getTime(), this);
         NewMessageNotification.notify(application, messages);
+
+        Log.d(TAG, "New messages saved to local database");
     }
 
 }

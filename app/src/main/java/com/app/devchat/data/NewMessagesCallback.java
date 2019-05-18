@@ -1,5 +1,7 @@
 package com.app.devchat.data;
 
+import com.app.devchat.data.DataModels.Message;
+
 import java.util.ArrayList;
 
 /**

@@ -6,10 +6,9 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 
-import com.app.devchat.data.Message;
+import com.app.devchat.data.DataModels.Message;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.Person;

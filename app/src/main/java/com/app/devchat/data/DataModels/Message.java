@@ -1,4 +1,4 @@
-package com.app.devchat.data;
+package com.app.devchat.data.DataModels;
 
 import java.util.Date;
 
@@ -15,6 +15,9 @@ public class Message {
     @NonNull
     public int id;
 
+
+    public String key;
+
     @ColumnInfo
     public String text;
 
@@ -25,7 +28,7 @@ public class Message {
     public String sender;
 
     @Ignore
-    public Message(String text, Date time, String sender) {
+    public Message(String key, String text, Date time, String sender) {
         this.text = text;
         this.time = time;
         this.sender = sender;
@@ -47,9 +50,13 @@ public class Message {
         return sender;
     }
 
+    public String getKey() {
+        return key;
+    }
+
     @Override
     public boolean equals(Object obj) {
         Message message = (Message) obj;
-        return message.id == id;
+        return message.key == key;
     }
 }

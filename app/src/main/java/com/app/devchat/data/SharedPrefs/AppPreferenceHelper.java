@@ -30,7 +30,7 @@ public class AppPreferenceHelper implements PreferencesHelper {
 
     @Override
     public int getLoginStatus() {
-        return mSharedPrefs.getInt(KEY_LOGIN_STATUS, -1);
+        return mSharedPrefs.getInt(KEY_LOGIN_STATUS, LoginMode.LOGGED_OUT.getMode());
     }
 
     @Override

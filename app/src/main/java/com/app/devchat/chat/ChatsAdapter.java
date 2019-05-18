@@ -1,4 +1,4 @@
-package com.app.devchat.ui;
+package com.app.devchat.chat;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,7 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.app.devchat.R;
-import com.app.devchat.data.Message;
+import com.app.devchat.data.DataModels.Message;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -43,7 +43,7 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext()).
-                    inflate(R.layout.chat_message_in_listitem, parent, false);
+                    inflate(R.layout.chat_listitem, parent, false);
 
         return new MyViewHolder(view);
     }
@@ -55,14 +55,7 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
         //RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)holder.rootView.getLayoutParams();
         int margin = context.getResources().getDimensionPixelSize(R.dimen.dimen_list_item_margin);
         if(message.getSender().equals(userName)){
-            /*
-            holder.rootView.setBackground(context.getResources().getDrawable(R.drawable.out_bubble));
-            params.setMargins(context.getResources().
-                    getDimensionPixelSize(R.dimen.dimen_chat_bubble_side_margin),margin,margin,0);
-            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            holder.rootView.setLayoutParams(params);
-            holder.sender.setVisibility(View.GONE);
-             */
+
             holder.inMessageRootView.setVisibility(View.GONE);
             holder.outMessageRootView.setVisibility(View.VISIBLE);
             holder.out_sender.setVisibility(View.GONE);
@@ -70,22 +63,12 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
             holder.out_time.setText(formatDate(message.getTime()));
 
         }else {
-            /*
-            holder.rootView.setBackground(context.getResources().getDrawable(R.drawable.in_bubble));
-            params.setMargins(margin,margin,context.getResources().
-                    getDimensionPixelSize(R.dimen.dimen_chat_bubble_side_margin),0);
-            params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-            holder.rootView.setLayoutParams(params);
-            holder.sender.setText(message.getSender());
-            holder.sender.setVisibility(View.VISIBLE);
-            */
 
             holder.outMessageRootView.setVisibility(View.GONE);
             holder.inMessageRootView.setVisibility(View.VISIBLE);
             holder.in_sender.setText(message.getSender());
             holder.in_text.setText(message.getText());
             holder.in_time.setText(formatDate(message.getTime()));
-
         }
     }
 

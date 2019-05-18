@@ -1,6 +1,6 @@
 package com.app.devchat.DepedencyInjecton;
 
-import com.app.devchat.ui.ChatActivityViewModel;
+import com.app.devchat.chat.ChatActivityViewModel;
 
 import javax.inject.Singleton;
 
