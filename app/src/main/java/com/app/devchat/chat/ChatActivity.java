@@ -80,6 +80,11 @@ public class ChatActivity extends AppCompatActivity {
 
         enableStrictMode();
 
+        if(viewModel.getLoginStatus() == LoginMode.LOGGED_OUT.getMode()){
+           userLogin();
+        }
+
+
         createNotificationChannel();
 
         handler = new Handler(Looper.getMainLooper());
@@ -115,6 +120,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreateOptionsMenu(menu);
         return true;
     }
+
 
     /**
      * Check for long running work on the UI thread
@@ -192,4 +198,54 @@ public class ChatActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
         }
     }
+
+
+    void userLogin(){
+
+        List<AuthUI.IdpConfig> authProviders = Arrays.asList(
+                 new AuthUI.IdpConfig.FacebookBuilder().build(),
+                new AuthUI.IdpConfig.GoogleBuilder().build(),
+                new AuthUI.IdpConfig.EmailBuilder().build()
+        );
+
+        startActivityForResult(
+                AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setAvailableProviders(authProviders)
+                .build(), REQUEST_CODE_SIGN_IN
+        );
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == REQUEST_CODE_SIGN_IN && data != null){
+            IdpResponse response = IdpResponse.fromResultIntent(data);
+           loginToken = response.getIdpToken();
+
+            if(resultCode == RESULT_OK){
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                if(!response.isNewUser()){
+                    //Save user to backend database
+                    User user1 = new User(
+                            user.getDisplayName(),
+                            user.getEmail(),
+                            user.getPhotoUrl(),
+                            user.getProviderId()
+                    );
+
+                    viewModel.saveNewUserToBackend(user1);
+                }
+            }else {
+                Log.e(TAG, "Firebase error", response.getError().getCause());
+            }
+        } else if (data == null) {
+            // i.e when user presses back button
+
+
+        }
+    }
+
 }
