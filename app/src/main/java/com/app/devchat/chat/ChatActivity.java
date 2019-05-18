@@ -122,6 +122,17 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_item_logout) {
+
+            viewModel.setLoginStatus(LoginMode.LOGGED_OUT);
+        }
+
+        super.onOptionsItemSelected(item);
+        return true;
+    }
+
     /**
      * Check for long running work on the UI thread
      */
