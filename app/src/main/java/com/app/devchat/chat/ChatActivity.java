@@ -1,17 +1,17 @@
 package com.app.devchat.chat;
 
-import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.StrictMode;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,29 +20,28 @@ import android.widget.EditText;
 
 import com.app.devchat.BaseApplication;
 import com.app.devchat.BuildConfig;
-import com.app.devchat.backgroundMessaging.BackgroundMessagingWorker;
-import com.app.devchat.backgroundMessaging.CheckNewMessagesAlarmReceiver;
 import com.app.devchat.NewMessageNotification;
 import com.app.devchat.R;
+import com.app.devchat.backgroundMessaging.MessagingService;
+import com.app.devchat.backgroundMessaging.MessagingService.MessagingServiceBinder;
+import com.app.devchat.data.DataModels.Message;
 import com.app.devchat.data.DataModels.User;
 import com.app.devchat.data.LoginMode;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.auth.GoogleAuthException;
-import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.work.WorkManager;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -58,17 +57,17 @@ public class ChatActivity extends AppCompatActivity {
     @Inject
     ChatActivityViewModel viewModel;
 
-
     @BindView(R.id.message_input)
     EditText messageInput;
 
     @BindView(R.id.chats_recycler_view)
     RecyclerView recyclerView;
 
-
     InputMethodManager imm;
     private LinearLayoutManager layoutManager;
     private Handler handler;
+    private ChatsAdapter adapter;
+    private boolean isBound;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,36 +79,15 @@ public class ChatActivity extends AppCompatActivity {
 
         enableStrictMode();
 
-        if(viewModel.getLoginStatus() == LoginMode.LOGGED_OUT.getMode()){
-           userLogin();
-        }
-
-
         createNotificationChannel();
 
         handler = new Handler(Looper.getMainLooper());
         imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        ChatsAdapter adapter = new ChatsAdapter(this, viewModel.getUserName());
         layoutManager = new LinearLayoutManager(this);
         layoutManager.setReverseLayout(true);
         layoutManager.setSmoothScrollbarEnabled(true);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
         recyclerView.setHasFixedSize(true);
-
-        viewModel.initializeData();
-
-        // Observe for database changes and update ui accordingly
-        viewModel.liveMessages.observe(this, messages -> {
-            adapter.submitList(messages);
-            handler.postDelayed(() -> layoutManager.scrollToPositionWithOffset(0, 8), 100);
-            if(!viewModel.hasDoneIntialLoad && !messages.isEmpty()){
-                viewModel.getNewMessages(messages.get(0).getTime());
-            }else if(!viewModel.hasDoneIntialLoad) {
-                viewModel.getNewMessages(new Date());
-            }
-        });
 
     }
 
@@ -143,39 +121,70 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-
-    @Override
-    protected void onPause() {
-
-        // Start background messages service
-        Intent intent = new Intent(this, CheckNewMessagesAlarmReceiver.class);
-        final PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                this, CheckNewMessagesAlarmReceiver.REQUEST_CODE,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        if (alarmManager != null) {
-            alarmManager.set(
-                    AlarmManager.RTC,
-                    SystemClock.elapsedRealtime() + CheckNewMessagesAlarmReceiver.ALARM_TRIGGER_TIME,
-                    pendingIntent
-            );
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+             MessagingServiceBinder binder = (MessagingServiceBinder) service;
+            viewModel.setService(binder.getService());
+            loadUI();
+            isBound = true;
         }
-        super.onPause();
-    }
 
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isBound = false;
+        }
+    };
 
     @Override
-    protected void onResume() {
+    protected void onStart() {
 
         //Clear any notifications
         NewMessageNotification.cancel(this);
-        viewModel.listenForNewMessages(new Date());
 
-        // Stop background messages service
-        WorkManager.getInstance().cancelAllWork();
+        Intent intent = new Intent(this, MessagingService.class);
 
-        super.onResume();
+        startService(intent);
+
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+
+        if (isBound) {
+
+
+        }
+
+        super.onStart();
     }
+
+    void loadUI(){
+        if(viewModel.getLoginStatus() == LoginMode.LOGGED_OUT.getMode()){
+            userLogin();
+        }
+
+        adapter = new ChatsAdapter(this, viewModel.getUserName());
+        recyclerView.setAdapter(adapter);
+
+        viewModel.getData().observe(this, new Observer<PagedList<Message>>() {
+            @Override
+            public void onChanged(PagedList<Message> messages) {
+                adapter.submitList(messages);
+                layoutManager.scrollToPositionWithOffset(0, 8);
+            }
+        });
+    }
+
+
+    @Override
+    protected void onStop() {
+
+        viewModel.setBackgroundMode(true);
+        // Start background messages service
+        unbindService(connection);
+        isBound = false;
+
+        super.onStop();
+    }
+
 
     /**
      * Sends new message
@@ -186,10 +195,14 @@ public class ChatActivity extends AppCompatActivity {
         if(!text.isEmpty()){
             viewModel.sendMessage(text);
             messageInput.setText(null);
-            if(!viewModel.liveMessages.getValue().isEmpty()) {
-                viewModel.liveMessages.getValue().loadAround(0);
+            layoutManager.scrollToPositionWithOffset(0, 8);
+
+            /*
+            if(!data.getValue().isEmpty()) {
+                data.getValue().loadAround(0);
                 layoutManager.scrollToPositionWithOffset(0, 8);
             }
+            */
         }
     }
 

@@ -7,10 +7,10 @@ import com.app.devchat.DepedencyInjecton.AppComponent;
 import com.app.devchat.DepedencyInjecton.AppModule;
 import com.app.devchat.DepedencyInjecton.DaggerAppComponent;
 
+
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
-//import com.app.devchat.DepedencyInjecton.DaggerAppComponent;
 public class BaseApplication extends MultiDexApplication {
 
     AppComponent component;

@@ -39,8 +39,7 @@ public class AppDataManager implements DataManager {
     private String userStatus;
     private Application application;
     private static DataManager dataManager;
-
-
+    private boolean backgroundMode;
 
     @Inject
     public AppDataManager(PreferencesHelper preferencesHelper,
@@ -64,11 +63,10 @@ public class AppDataManager implements DataManager {
         dataManager = this;
     }
 
-
-    public static DataManager getInstance(){
-        return dataManager;
+    @Override
+    public void setBackgroundMode(boolean mode) {
+        backgroundMode = mode;
     }
-
 
     // ********* Backend database access methods **********************
     @Override
@@ -92,6 +90,10 @@ public class AppDataManager implements DataManager {
         networkHelper.addNewUserToBackEndDatabase(user);
     }
 
+    @Override
+    public void deRegisterListener() {
+        networkHelper.deRegisterListener();
+    }
 
     // **************** Shared preferences data access methods *****************
     @Override
@@ -157,6 +159,12 @@ public class AppDataManager implements DataManager {
     @Override
     public void storeMessagesToLocalDatabase(ArrayList<Message> messages) {
         dbHelper.storeMessagesToLocalDatabase(messages);
+        sendMessagesToBackendDatabase(messages);
+    }
+
+    @Override
+    public Date getNewestMessageDate() {
+        return dbHelper.getNewestMessageDate();
     }
 
     /**
@@ -166,11 +174,21 @@ public class AppDataManager implements DataManager {
     @Override
     public void onNewMessages(ArrayList<Message> messages) {
         storeMessagesToLocalDatabase(messages);
+
         // update new messages listener
-        listenForNewMessages(messages.get(messages.size()-1).getTime(), this);
-        NewMessageNotification.notify(application, messages);
+        Date newestMessageDate = messages.get(messages.size() - 1).getTime();
+
+        if (backgroundMode) {
+            // Show new messages' notification
+            NewMessageNotification.notify(application, messages);
+        }
+
+        listenForNewMessages(newestMessageDate, this);
 
         Log.d(TAG, "New messages saved to local database");
     }
+
+
+
 
 }

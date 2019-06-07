@@ -12,4 +12,6 @@ public interface DataManager extends PreferencesHelper, NetworkHelper, LocalData
 
     void updateUserInfo(String username, String userEmail, String userPhoto, LoginMode loginMode);
 
+    void setBackgroundMode(boolean lightMode);
+
 }

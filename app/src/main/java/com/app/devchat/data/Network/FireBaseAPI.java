@@ -41,7 +41,6 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
 
     public FireBaseAPI() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.getApp().setAutomaticResourceManagementEnabled(true);
         chatsRef = db.collection("chats");
         usersRef = db.collection("users");
     }
@@ -142,8 +141,6 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
             if(newMessages.size() > 0 ){
                 // save new messages to local database
                 newMessagesCallback.onNewMessages(newMessages);
-            } else {
-                updateOnNewMessageListener(new Date());
             }
 
         }
@@ -192,5 +189,16 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
         if (task.isSuccessful()){
 
         }
+    }
+
+    /**
+     * Remove  Listener
+     */
+    @Override
+    public void deRegisterListener() {
+        if (listenerRegistration != null){
+            listenerRegistration.remove();
+        }
+
     }
 }

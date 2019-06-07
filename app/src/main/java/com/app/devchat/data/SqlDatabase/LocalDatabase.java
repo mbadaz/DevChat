@@ -3,6 +3,8 @@ package com.app.devchat.data.SqlDatabase;
 import com.app.devchat.data.DataModels.Message;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import androidx.lifecycle.LiveData;
 import androidx.paging.PagedList;
@@ -17,4 +19,6 @@ public interface LocalDatabase {
     LiveData<PagedList<Message>> getMessagesFromLocalDatabase();
 
     void storeMessagesToLocalDatabase(ArrayList<Message> messages);
+
+    Date getNewestMessageDate();
 }

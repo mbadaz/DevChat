@@ -1,7 +1,14 @@
 package com.app.devchat.chat;
 
 import android.app.Application;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 
+import com.app.devchat.backgroundMessaging.MessagingService;
+import com.app.devchat.backgroundMessaging.MessagingService.MessagingServiceBinder;
 import com.app.devchat.data.DataManager;
 import com.app.devchat.data.DataModels.Message;
 import com.app.devchat.data.DataModels.User;
@@ -22,66 +29,52 @@ import androidx.paging.PagedList;
 @Singleton
 public class ChatActivityViewModel extends AndroidViewModel {
 
-    private DataManager dataManager;
-    LiveData<PagedList<Message>> liveMessages;
-    boolean hasDoneIntialLoad = false;
+    private MessagingService messagingService;
 
     @Inject
-    public ChatActivityViewModel(@NonNull Application application, DataManager dataManager) {
+    public ChatActivityViewModel(@NonNull Application application) {
         super(application);
-        this.dataManager = dataManager;
     }
 
-    void initializeData(){
 
-        liveMessages = dataManager.getMessagesFromLocalDatabase();
+    void setService(MessagingService messagingService){
+        this.messagingService = messagingService;
+        this.messagingService.setBackgrooundMode(false);
+    }
+
+
+
+    LiveData<PagedList<Message>> getData(){
+        return messagingService.getLiveMessages();
     }
 
     void sendMessage(String text){
-        ArrayList<Message> messages = new ArrayList<>();
-        messages.add(new Message(null, text, new Date(), dataManager.getUserName()));
-        dataManager.storeMessagesToLocalDatabase(messages);
-        dataManager.sendMessagesToBackendDatabase(messages);
-    }
-
-    public void listenForNewMessages(Date date){
-        dataManager.listenForNewMessages(date, dataManager);
+        messagingService.sendNewMessage(text);
     }
 
     String getUserName(){
-        return dataManager.getUserName();
+        return messagingService.getUserName();
     }
 
-    void getNewMessages(Date date){
-        if(!hasDoneIntialLoad){
-            dataManager.getNewMessagesFromBackendDatabase(date, dataManager);
-            hasDoneIntialLoad = true;
-        }
-    }
 
     void saveNewUserToBackend(User user){
-        dataManager.addNewUserToBackEndDatabase(user);
+        messagingService.saveUser(user);
 
-        LoginMode loginMode;
-
-        if(user.getSignInMethod() == FacebookAuthProvider.FACEBOOK_SIGN_IN_METHOD){
-            loginMode = LoginMode.FB_LOGIN;
-        }else if (user.getSignInMethod() == GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD){
-            loginMode = LoginMode.GOOGLE_LOGIN;
-        }else{
-            loginMode = LoginMode.EMAIL_LOGIN;
-        }
-
-        dataManager.updateUserInfo(user.getUserName(), user.getUserEmail(), user.getPhotoUrl(), loginMode);
     }
 
     int getLoginStatus(){
-        return dataManager.getLoginStatus();
+        return messagingService.getLoginStatus();
     }
 
     void setLoginStatus(LoginMode mode) {
-        dataManager.setLoginStatus(mode);
+        messagingService.setLoginStatus(mode);
     }
+
+    void setBackgroundMode(boolean mode){
+        messagingService.setBackgrooundMode(mode);
+    }
+
+
 
 
 }
