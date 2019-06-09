@@ -148,9 +148,6 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     void loadUI(){
-        if(viewModel.getLoginStatus() == LoginMode.LOGGED_OUT.getMode()){
-            userLogin();
-        }
 
         viewModel.setBackgroundMode(false);
 
@@ -182,6 +179,21 @@ public class ChatActivity extends AppCompatActivity {
         super.onStop();
     }
 
+    /**
+     * Dispatch onPause() to fragments.
+     */
+    @Override
+    protected void onPause() {
+        if(isBound){
+            viewModel.setBackgroundMode(true);
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 
     /**
      * Sends new message

@@ -40,11 +40,6 @@ public class MessagingService extends Service {
         super.onCreate();
         DaggerMessagingServiceComponent.builder().appModule(new AppModule(getApplication())).
                 build().inject(this);
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
         Date date = dataManager.getNewestMessageDate();
         if (date != null) {
             dataManager.getNewMessagesFromBackendDatabase(date, dataManager);
@@ -52,6 +47,12 @@ public class MessagingService extends Service {
         } else {
             dataManager.listenForNewMessages(new Date(), dataManager);
         }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+
         return START_STICKY;
     }
 

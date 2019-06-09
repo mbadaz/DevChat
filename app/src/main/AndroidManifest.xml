@@ -23,7 +23,8 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".backgroundMessaging.MessagingService" />
+        <service android:name=".backgroundMessaging.MessagingService"
+            android:enabled="true"/>
     </application>
 
 </manifest>
