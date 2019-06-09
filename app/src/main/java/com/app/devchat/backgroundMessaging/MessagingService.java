@@ -1,32 +1,29 @@
 package com.app.devchat.backgroundMessaging;
 
-import android.app.Application;
-import android.app.IntentService;
+
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-
 import androidx.lifecycle.LiveData;
 import androidx.paging.PagedList;
-
 import com.app.devchat.DepedencyInjecton.AppModule;
 import com.app.devchat.DepedencyInjecton.DaggerMessagingServiceComponent;
-import com.app.devchat.DepedencyInjecton.MessagingServiceModule;
 import com.app.devchat.data.DataManager;
 import com.app.devchat.data.DataModels.Message;
 import com.app.devchat.data.DataModels.User;
 import com.app.devchat.data.LoginMode;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.GoogleAuthProvider;
-
 import java.util.ArrayList;
 import java.util.Date;
-
 import javax.inject.Inject;
 
-public class MessagingService extends IntentService {
+/**
+ * {@link Service} that executes the app's messaging functions in the background when
+ * the app is not running and also when the app is running ( when an activity has bound to it)
+ */
+public class MessagingService extends Service {
 
     MessagingServiceBinder binder = new MessagingServiceBinder();
 
@@ -35,8 +32,7 @@ public class MessagingService extends IntentService {
 
     @Inject
     public MessagingService() {
-        super("MessagingService");
-
+        super();
     }
 
     @Override
@@ -47,12 +43,8 @@ public class MessagingService extends IntentService {
     }
 
     @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
-    }
-
-    @Override
-    protected void onHandleIntent(Intent intent) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
         Date date = dataManager.getNewestMessageDate();
         if (date != null) {
             dataManager.getNewMessagesFromBackendDatabase(date, dataManager);
@@ -60,8 +52,17 @@ public class MessagingService extends IntentService {
         } else {
             dataManager.listenForNewMessages(new Date(), dataManager);
         }
+        return START_STICKY;
     }
 
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
+    /**
+     * The {@link Binder} that allows clients to bind to the service
+     */
     public class MessagingServiceBinder extends Binder {
 
        public MessagingService getService(){
@@ -72,6 +73,7 @@ public class MessagingService extends IntentService {
     public void sendNewMessage(String text){
         ArrayList<Message> messages = new ArrayList<>();
         messages.add(new Message(null, text, new Date(), dataManager.getUserName()));
+        dataManager.storeMessagesToLocalDatabase(messages);
         dataManager.sendMessagesToBackendDatabase(messages);
     }
 
@@ -91,11 +93,11 @@ public class MessagingService extends IntentService {
         dataManager.addNewUserToBackEndDatabase(user);
                 LoginMode loginMode;
 
-        if(user.getSignInMethod() == FacebookAuthProvider.FACEBOOK_SIGN_IN_METHOD){
+        if (user.getSignInMethod() == FacebookAuthProvider.FACEBOOK_SIGN_IN_METHOD){
             loginMode = LoginMode.FB_LOGIN;
-        }else if (user.getSignInMethod() == GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD){
+        } else if (user.getSignInMethod() == GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD){
             loginMode = LoginMode.GOOGLE_LOGIN;
-        }else{
+        } else {
             loginMode = LoginMode.EMAIL_LOGIN;
         }
 
@@ -108,5 +110,11 @@ public class MessagingService extends IntentService {
 
     public int getLoginStatus(){
         return dataManager.getLoginStatus();
+    }
+
+    @Override
+    public void onDestroy() {
+        dataManager.deRegisterListener();
+        super.onDestroy();
     }
 }

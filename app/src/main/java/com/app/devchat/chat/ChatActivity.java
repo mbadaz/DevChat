@@ -6,11 +6,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.Menu;
@@ -24,7 +23,6 @@ import com.app.devchat.NewMessageNotification;
 import com.app.devchat.R;
 import com.app.devchat.backgroundMessaging.MessagingService;
 import com.app.devchat.backgroundMessaging.MessagingService.MessagingServiceBinder;
-import com.app.devchat.data.DataModels.Message;
 import com.app.devchat.data.DataModels.User;
 import com.app.devchat.data.LoginMode;
 import com.firebase.ui.auth.AuthUI;
@@ -37,8 +35,6 @@ import java.util.List;
 import javax.inject.Inject;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -63,9 +59,8 @@ public class ChatActivity extends AppCompatActivity {
     @BindView(R.id.chats_recycler_view)
     RecyclerView recyclerView;
 
-    InputMethodManager imm;
-    private LinearLayoutManager layoutManager;
-    private Handler handler;
+    InputMethodManager inputMethodManager;
+    private LinearLayoutManager layoutManager;;
     private ChatsAdapter adapter;
     private boolean isBound;
 
@@ -81,8 +76,7 @@ public class ChatActivity extends AppCompatActivity {
 
         createNotificationChannel();
 
-        handler = new Handler(Looper.getMainLooper());
-        imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         layoutManager = new LinearLayoutManager(this);
         layoutManager.setReverseLayout(true);
         layoutManager.setSmoothScrollbarEnabled(true);
@@ -126,8 +120,9 @@ public class ChatActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
              MessagingServiceBinder binder = (MessagingServiceBinder) service;
             viewModel.setService(binder.getService());
-            loadUI();
             isBound = true;
+            loadUI();
+
         }
 
         @Override
@@ -142,16 +137,12 @@ public class ChatActivity extends AppCompatActivity {
         //Clear any notifications
         NewMessageNotification.cancel(this);
 
+        // start messaging service
         Intent intent = new Intent(this, MessagingService.class);
-
         startService(intent);
 
+        // bind to messaging service
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
-
-        if (isBound) {
-
-
-        }
 
         super.onStart();
     }
@@ -161,15 +152,20 @@ public class ChatActivity extends AppCompatActivity {
             userLogin();
         }
 
+        viewModel.setBackgroundMode(false);
+
         adapter = new ChatsAdapter(this, viewModel.getUserName());
         recyclerView.setAdapter(adapter);
 
-        viewModel.getData().observe(this, new Observer<PagedList<Message>>() {
-            @Override
-            public void onChanged(PagedList<Message> messages) {
-                adapter.submitList(messages);
-                layoutManager.scrollToPositionWithOffset(0, 8);
-            }
+        viewModel.getData().observe(this, messages -> {
+           // adapter.submitList(messages);
+            adapter.submitList(messages, new Runnable() {
+                @Override
+                public void run() {
+                    //messages.loadAround(0);
+                    layoutManager.scrollToPositionWithOffset(0, 8);
+                }
+            });
         });
     }
 
@@ -177,10 +173,11 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
 
-        viewModel.setBackgroundMode(true);
-        // Start background messages service
-        unbindService(connection);
-        isBound = false;
+        if (isBound) {
+            // Start background messages service
+            unbindService(connection);
+            isBound = false;
+        }
 
         super.onStop();
     }
@@ -195,14 +192,7 @@ public class ChatActivity extends AppCompatActivity {
         if(!text.isEmpty()){
             viewModel.sendMessage(text);
             messageInput.setText(null);
-            layoutManager.scrollToPositionWithOffset(0, 8);
-
-            /*
-            if(!data.getValue().isEmpty()) {
-                data.getValue().loadAround(0);
-                layoutManager.scrollToPositionWithOffset(0, 8);
-            }
-            */
+            inputMethodManager.hideSoftInputFromWindow(messageInput.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
         }
     }
 
@@ -250,20 +240,24 @@ public class ChatActivity extends AppCompatActivity {
 
             if(resultCode == RESULT_OK){
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-                if(!response.isNewUser()){
+                String userName = user.getDisplayName();
+                String userEmail = user.getEmail();
+                Uri userPhotoUri = user.getPhotoUrl();
+                String authProvider = user.getProviderId();
+                if(response.isNewUser()){
                     //Save user to backend database
                     User user1 = new User(
-                            user.getDisplayName(),
-                            user.getEmail(),
-                            user.getPhotoUrl(),
-                            user.getProviderId()
+                            userName,
+                            userEmail,
+                            userPhotoUri,
+                            authProvider
                     );
 
                     viewModel.saveNewUserToBackend(user1);
+
                 }
             }else {
-                Log.e(TAG, "Firebase error", response.getError().getCause());
+                Log.e(TAG, "Firebase error", response.getError());
             }
         } else if (data == null) {
             // i.e when user presses back button

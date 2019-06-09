@@ -13,6 +13,7 @@ import com.app.devchat.data.SqlDatabase.LocalDatabase;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -39,7 +40,7 @@ public class AppDataManager implements DataManager {
     private String userStatus;
     private Application application;
     private static DataManager dataManager;
-    private boolean backgroundMode;
+    private boolean backgroundMode = true;
 
     @Inject
     public AppDataManager(PreferencesHelper preferencesHelper,
@@ -159,7 +160,6 @@ public class AppDataManager implements DataManager {
     @Override
     public void storeMessagesToLocalDatabase(ArrayList<Message> messages) {
         dbHelper.storeMessagesToLocalDatabase(messages);
-        sendMessagesToBackendDatabase(messages);
     }
 
     @Override

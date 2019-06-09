@@ -23,6 +23,7 @@
             </intent-filter>
         </activity>
 
+        <service android:name=".backgroundMessaging.MessagingService" />
     </application>
 
 </manifest>
