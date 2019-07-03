@@ -8,7 +8,7 @@ import com.app.devchat.data.DataModels.Message;
 import com.app.devchat.data.Network.NetworkHelper;
 import com.app.devchat.data.NewMessagesCallback;
 import com.app.devchat.data.SharedPrefs.PreferencesHelper;
-import com.app.devchat.data.SqlDatabase.LocalDatabase;
+import com.app.devchat.data.SqlDatabase.LocalDatabaseHelper;
 import com.google.common.collect.Lists;
 
 import org.junit.Before;
@@ -33,7 +33,7 @@ public class DataManagerUnitTests {
     NetworkHelper networkHelper;
 
     @Mock
-    LocalDatabase database;
+    LocalDatabaseHelper database;
 
     @Mock
     PreferencesHelper preferencesHelper;

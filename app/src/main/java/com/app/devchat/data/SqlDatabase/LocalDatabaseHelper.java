@@ -14,7 +14,7 @@ import androidx.paging.PagedList;
  * Every class that wants to act as the app's local messages database must implement this interface
  */
 
-public interface LocalDatabase {
+public interface LocalDatabaseHelper {
 
     LiveData<PagedList<Message>> getMessagesFromLocalDatabase();
 

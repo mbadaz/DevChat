@@ -9,8 +9,8 @@ import com.app.devchat.data.Network.FireBaseAPI;
 import com.app.devchat.data.Network.NetworkHelper;
 import com.app.devchat.data.SharedPrefs.AppPreferenceHelper;
 import com.app.devchat.data.SharedPrefs.PreferencesHelper;
-import com.app.devchat.data.SqlDatabase.SQLiteDatabase;
-import com.app.devchat.data.SqlDatabase.LocalDatabase;
+import com.app.devchat.data.SqlDatabase.LocalDatabaseHelper;
+import com.app.devchat.data.SqlDatabase.SQLiteDatabaseHelper;
 
 import javax.inject.Singleton;
 
@@ -20,22 +20,30 @@ import dagger.Provides;
 @Module
 public class AppModule {
 
-    private static Application application;
+    private Context mContext;
+    private static Application app;
 
-    public AppModule(Application app) {
-        application = app;
+    public AppModule(Context context) {
+        mContext = context;
+    }
+
+    public AppModule (Application application){
+        app = application;
     }
 
     @Provides
     @Singleton
     static Application provideApplication(){
-        return application;
+        return app;
     }
 
     @Provides
     @Singleton
-    static Context provideContext(){
-        return application.getApplicationContext();
+    Context provideContext(){
+        if (mContext == null){
+            return app.getApplicationContext();
+        }
+        return mContext.getApplicationContext();
     }
 
     @Provides
@@ -52,7 +60,7 @@ public class AppModule {
 
     @Provides
     @Singleton
-    static LocalDatabase provideAppDbHelper(SQLiteDatabase dbHelper){
+    static LocalDatabaseHelper provideAppDbHelper(SQLiteDatabaseHelper dbHelper){
         return dbHelper;
     }
 

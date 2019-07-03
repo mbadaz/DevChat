@@ -22,6 +22,4 @@ public interface NetworkHelper {
     void setUserName(String userName);
 
     void addNewUserToBackEndDatabase(User user);
-
-    void deRegisterListener();
 }

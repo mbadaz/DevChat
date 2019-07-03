@@ -22,7 +22,6 @@ import com.app.devchat.BuildConfig;
 import com.app.devchat.NewMessageNotification;
 import com.app.devchat.R;
 import com.app.devchat.backgroundMessaging.MessagingService;
-import com.app.devchat.backgroundMessaging.MessagingService.MessagingServiceBinder;
 import com.app.devchat.data.DataModels.User;
 import com.app.devchat.data.LoginMode;
 import com.firebase.ui.auth.AuthUI;
@@ -37,6 +36,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.WorkManager;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,7 +60,7 @@ public class ChatActivity extends AppCompatActivity {
     RecyclerView recyclerView;
 
     InputMethodManager inputMethodManager;
-    private LinearLayoutManager layoutManager;;
+    private LinearLayoutManager layoutManager;
     private ChatsAdapter adapter;
     private boolean isBound;
 
@@ -118,9 +118,10 @@ public class ChatActivity extends AppCompatActivity {
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-             MessagingServiceBinder binder = (MessagingServiceBinder) service;
+            MessagingService.MessagingServiceBinder binder = (MessagingService.MessagingServiceBinder) service;
             viewModel.setService(binder.getService());
             isBound = true;
+            viewModel.setBackgroundMode(false);
             loadUI();
 
         }
@@ -133,66 +134,43 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-
+        super.onStart();
         //Clear any notifications
         NewMessageNotification.cancel(this);
+        WorkManager.getInstance().cancelAllWork();
 
         // start messaging service
-        Intent intent = new Intent(this, MessagingService.class);
-        startService(intent);
-
+        Intent intent = new Intent(getApplicationContext(), MessagingService.class);
+        getApplicationContext().startService(intent);
         // bind to messaging service
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        getApplicationContext().bindService(intent, connection, Context.BIND_IMPORTANT);
 
-        super.onStart();
     }
 
     void loadUI(){
 
-        viewModel.setBackgroundMode(false);
+        if (viewModel.getLoginStatus() == LoginMode.LOGGED_OUT.getMode()){
+            userLogin();
+        }
 
         adapter = new ChatsAdapter(this, viewModel.getUserName());
         recyclerView.setAdapter(adapter);
 
         viewModel.getData().observe(this, messages -> {
            // adapter.submitList(messages);
-            adapter.submitList(messages, new Runnable() {
-                @Override
-                public void run() {
-                    //messages.loadAround(0);
-                    layoutManager.scrollToPositionWithOffset(0, 8);
-                }
+            adapter.submitList(messages, () -> {
+                //messages.loadAround(0);
+                layoutManager.scrollToPositionWithOffset(0, 8);
             });
         });
-    }
-
-
-    @Override
-    protected void onStop() {
-
-        if (isBound) {
-            // Start background messages service
-            unbindService(connection);
-            isBound = false;
-        }
-
-        super.onStop();
-    }
-
-    /**
-     * Dispatch onPause() to fragments.
-     */
-    @Override
-    protected void onPause() {
-        if(isBound){
-            viewModel.setBackgroundMode(true);
-        }
-        super.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        if(isBound){
+            viewModel.setBackgroundMode(false);
+        }
     }
 
     /**
@@ -224,7 +202,6 @@ public class ChatActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
         }
     }
-
 
     void userLogin(){
 
@@ -272,10 +249,37 @@ public class ChatActivity extends AppCompatActivity {
                 Log.e(TAG, "Firebase error", response.getError());
             }
         } else if (data == null) {
+            // TODO: handle when user presses back button
             // i.e when user presses back button
-
-
         }
+    }
+
+    /**
+     * Dispatch onPause() to fragments.
+     */
+    @Override
+    protected void onPause() {
+        if(isBound){
+
+            viewModel.setBackgroundMode(true);
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (isBound) {
+            // Start background messages service
+            viewModel.setBackgroundMode(true);
+            viewModel.getData().removeObservers(this);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getApplicationContext().unbindService(connection);
     }
 
 }

@@ -1,13 +1,16 @@
 package com.app.devchat.data.Network;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.app.devchat.backgroundMessaging.MessagingService;
 import com.app.devchat.data.DataModels.Message;
 import com.app.devchat.data.DataModels.User;
 import com.app.devchat.data.NewMessagesCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -38,11 +41,13 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
     private ListenerRegistration listenerRegistration;
     private static NewMessagesCallback newMessagesCallback;
     private static String userName;
+    private final FirebaseFirestore firebaseFirestore;
 
     public FireBaseAPI() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        chatsRef = db.collection("chats");
-        usersRef = db.collection("users");
+        firebaseFirestore = FirebaseFirestore.getInstance();
+        chatsRef = firebaseFirestore.collection("chats");
+        usersRef = firebaseFirestore.collection("users");
+
     }
 
     /**
@@ -82,7 +87,6 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
         chatsRef.whereGreaterThan("time", new Timestamp(date)).get().addOnSuccessListener(this);
 
     }
-
 
     /**
      * Send new messages to the messages collection
@@ -141,6 +145,8 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
             if(newMessages.size() > 0 ){
                 // save new messages to local database
                 newMessagesCallback.onNewMessages(newMessages);
+            } else {
+                newMessagesCallback.onNewMessages(null);
             }
 
         }
@@ -173,6 +179,8 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
 
                 if(newMessages.size() > 0 ){
                     newMessagesCallback.onNewMessages(newMessages);
+                } else {
+                    newMessagesCallback.onNewMessages(null);
                 }
 
                 Log.d(TAG, "snapshot from Firebase" + queryDocumentSnapshots.getMetadata().toString());
@@ -194,11 +202,14 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
     /**
      * Remove  Listener
      */
-    @Override
-    public void deRegisterListener() {
+    public void disable() {
         if (listenerRegistration != null){
             listenerRegistration.remove();
         }
+        firebaseFirestore.disableNetwork();
+    }
 
+    public void enable(){
+        firebaseFirestore.enableNetwork();
     }
 }

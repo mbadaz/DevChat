@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
 android {
+    compileOptions.incremental = false
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.app.devchat"

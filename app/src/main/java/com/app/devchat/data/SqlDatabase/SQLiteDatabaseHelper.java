@@ -1,19 +1,15 @@
 package com.app.devchat.data.SqlDatabase;
 
 import android.app.Application;
+import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
-import android.os.Looper;
-import android.provider.Telephony;
 
 import com.app.devchat.BuildConfig;
 import com.app.devchat.data.DataModels.Message;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,20 +19,13 @@ import androidx.paging.DataSource;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 import androidx.room.Room;
-import androidx.room.RoomSQLiteQuery;
-import androidx.room.util.CursorUtil;
-import androidx.room.util.DBUtil;
-import androidx.sqlite.db.SimpleSQLiteQuery;
-import androidx.sqlite.db.SupportSQLiteOpenHelper;
-import androidx.sqlite.db.SupportSQLiteQuery;
-import androidx.sqlite.db.SupportSQLiteQueryBuilder;
 
 /**
  * Api for the app's database functions. Uses the Room Persistence library and the Paging library
  * to load paged data from the SQL database.
  */
 @Singleton
-public class SQLiteDatabase implements LocalDatabase, Runnable{
+public class SQLiteDatabaseHelper implements LocalDatabaseHelper, Runnable{
 
     private static final String DB_NAME = BuildConfig.APPLICATION_ID + ".db";
     private LiveData<PagedList<Message>> messagesList;
@@ -44,15 +33,14 @@ public class SQLiteDatabase implements LocalDatabase, Runnable{
     private Date latestMessageDate;
 
     @Inject
-    public SQLiteDatabase(Application application) {
+    public SQLiteDatabaseHelper(Context context) {
 
         //TODO implement proper migration policy
-        db = Room.databaseBuilder(application, AppDatabase.class, DB_NAME).
+        db = Room.databaseBuilder(context, AppDatabase.class, DB_NAME).
                 fallbackToDestructiveMigration().build();
         PagedList.Config config = new PagedList.Config.Builder().
-                setEnablePlaceholders(false).setPrefetchDistance(120).
-                setInitialLoadSizeHint(40).
-                setPageSize(40).
+                setEnablePlaceholders(false).setPrefetchDistance(40).
+                setPageSize(20).
                 build();
         DataSource.Factory<Integer, Message> dataSource = db.messageDAO().getMessages();
         messagesList = new LivePagedListBuilder<>(dataSource, config).
@@ -119,6 +107,12 @@ public class SQLiteDatabase implements LocalDatabase, Runnable{
             latestMessageDate = new Date(cursor.getLong(timeColumnIndex));
         }
 
+    }
+
+    public void stopDatabase(){
+        if (db.inTransaction()){
+            db.getOpenHelper().getWritableDatabase().endTransaction();
+        }
     }
 
 
