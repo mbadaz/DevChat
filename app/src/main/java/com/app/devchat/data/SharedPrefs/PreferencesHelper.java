@@ -8,7 +8,7 @@ import com.app.devchat.data.LoginMode;
 
 public interface PreferencesHelper {
 
-    int getLoginStatus();
+    LoginMode getLoginStatus();
     void setLoginStatus(LoginMode loginMode);
 
     String getUserName();

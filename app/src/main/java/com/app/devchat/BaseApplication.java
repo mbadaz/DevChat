@@ -21,6 +21,9 @@ public class BaseApplication extends MultiDexApplication {
     public void onCreate() {
         super.onCreate();
         component = DaggerAppComponent.builder().appModule(new AppModule(this)).build();
+        // start messaging service
+        Intent intent = new Intent(getApplicationContext(), MessagingService.class);
+        getApplicationContext().startService(intent);
 
     }
 

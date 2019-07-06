@@ -4,6 +4,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
@@ -31,9 +32,12 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+
 import javax.inject.Inject;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.WorkManager;
@@ -43,12 +47,11 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity implements AnonymousLoginConfirmDialog.AnonymousLoginConfirmDialogListener{
 
     static final String TAG = ChatActivity.class.getSimpleName();
     static final String CHANNEL_ID = BuildConfig.APPLICATION_ID;
     public static final int REQUEST_CODE_SIGN_IN = 2;
-    private String loginToken;
 
     @Inject
     ChatActivityViewModel viewModel;
@@ -99,6 +102,7 @@ public class ChatActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.menu_item_logout) {
 
             viewModel.setLoginStatus(LoginMode.LOGGED_OUT);
+            userLogin();
         }
 
         super.onOptionsItemSelected(item);
@@ -139,17 +143,15 @@ public class ChatActivity extends AppCompatActivity {
         NewMessageNotification.cancel(this);
         WorkManager.getInstance().cancelAllWork();
 
-        // start messaging service
-        Intent intent = new Intent(getApplicationContext(), MessagingService.class);
-        getApplicationContext().startService(intent);
         // bind to messaging service
-        getApplicationContext().bindService(intent, connection, Context.BIND_IMPORTANT);
+        Intent intent = new Intent(getApplicationContext(), MessagingService.class);
+        getApplicationContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
     }
 
     void loadUI(){
 
-        if (viewModel.getLoginStatus() == LoginMode.LOGGED_OUT.getMode()){
+        if (viewModel.getLoginStatus() == LoginMode.LOGGED_OUT){
             userLogin();
         }
 
@@ -157,12 +159,13 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         viewModel.getData().observe(this, messages -> {
-           // adapter.submitList(messages);
+            // adapter.submitList(messages);
             adapter.submitList(messages, () -> {
                 //messages.loadAround(0);
                 layoutManager.scrollToPositionWithOffset(0, 8);
             });
         });
+
     }
 
     @Override
@@ -199,16 +202,21 @@ public class ChatActivity extends AppCompatActivity {
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+
         }
     }
 
     void userLogin(){
-
+        // Launch Firebase AuthUI
         List<AuthUI.IdpConfig> authProviders = Arrays.asList(
                  new AuthUI.IdpConfig.FacebookBuilder().build(),
                 new AuthUI.IdpConfig.GoogleBuilder().build(),
-                new AuthUI.IdpConfig.EmailBuilder().build()
+                new AuthUI.IdpConfig.EmailBuilder().build(),
+                new AuthUI.IdpConfig.AnonymousBuilder().build()
         );
 
         startActivityForResult(
@@ -225,9 +233,23 @@ public class ChatActivity extends AppCompatActivity {
 
         if(requestCode == REQUEST_CODE_SIGN_IN && data != null){
             IdpResponse response = IdpResponse.fromResultIntent(data);
-           loginToken = response.getIdpToken();
 
             if(resultCode == RESULT_OK){
+                switch (Objects.requireNonNull(response).getProviderType()) {
+                    case "anonymous":
+                        viewModel.setLoginStatus(LoginMode.ANONYMOUS_LOGIN);
+                        break;
+                    case "password":
+                        viewModel.setLoginStatus(LoginMode.EMAIL_LOGIN);
+                        break;
+                    case "google.com":
+                        viewModel.setLoginStatus(LoginMode.GOOGLE_LOGIN);
+                        break;
+                    case "facebook.com":
+                        viewModel.setLoginStatus(LoginMode.FB_LOGIN);
+                        break;
+                }
+
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 String userName = user.getDisplayName();
                 String userEmail = user.getEmail();
@@ -249,9 +271,26 @@ public class ChatActivity extends AppCompatActivity {
                 Log.e(TAG, "Firebase error", response.getError());
             }
         } else if (data == null) {
-            // TODO: handle when user presses back button
             // i.e when user presses back button
+            AnonymousLoginConfirmDialog dialog = AnonymousLoginConfirmDialog.newInstance();
+            dialog.show(getSupportFragmentManager(), "Login alert");
         }
+    }
+
+    @Override
+    public void onDialogConfirm(int confirmation) {
+        if (isBound) {
+            switch (confirmation) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    viewModel.setLoginStatus(LoginMode.ANONYMOUS_LOGIN);
+                case DialogInterface.BUTTON_NEGATIVE:
+                    userLogin();
+                case DialogInterface.BUTTON_NEUTRAL:
+                    finish();
+
+            }
+        }
+
     }
 
     /**

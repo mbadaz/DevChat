@@ -29,18 +29,18 @@ public class AppPreferenceHelper implements PreferencesHelper {
     }
 
     @Override
-    public int getLoginStatus() {
-        return mSharedPrefs.getInt(KEY_LOGIN_STATUS, LoginMode.LOGGED_OUT.getMode());
+    public LoginMode getLoginStatus() {
+        return LoginMode.getMode(mSharedPrefs.getInt(KEY_LOGIN_STATUS, 0));
     }
 
     @Override
     public void setLoginStatus(LoginMode loginMode) {
-        mSharedPrefs.edit().putInt(KEY_LOGIN_STATUS, loginMode.getMode()).apply();
+        mSharedPrefs.edit().putInt(KEY_LOGIN_STATUS, loginMode.ordinal()).apply();
     }
 
     @Override
     public String getUserName() {
-        return mSharedPrefs.getString(KEY_USERNAME, "phone");
+        return mSharedPrefs.getString(KEY_USERNAME, "none");
     }
 
     @Override

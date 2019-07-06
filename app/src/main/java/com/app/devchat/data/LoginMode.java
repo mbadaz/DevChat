@@ -1,18 +1,25 @@
 package com.app.devchat.data;
 
 public enum LoginMode {
-    LOGGED_OUT(0),
-    GOOGLE_LOGIN(1),
-    FB_LOGIN(2),
-    EMAIL_LOGIN(3);
+    LOGGED_OUT,
+    GOOGLE_LOGIN,
+    FB_LOGIN,
+    EMAIL_LOGIN,
+    ANONYMOUS_LOGIN;
 
-    private final int mode;
-
-    LoginMode(int mode) {
-        this.mode = mode;
+    public static LoginMode getMode(int mode) {
+        switch (mode) {
+            case 1:
+                return GOOGLE_LOGIN;
+            case 2:
+                return FB_LOGIN;
+            case 3:
+                return EMAIL_LOGIN;
+            case 4:
+                return ANONYMOUS_LOGIN;
+        }
+        return LOGGED_OUT;
     }
 
-    public int getMode() {
-        return mode;
-    }
+
 }

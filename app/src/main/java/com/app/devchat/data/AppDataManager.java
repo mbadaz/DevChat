@@ -13,6 +13,7 @@ import com.app.devchat.data.SqlDatabase.SQLiteDatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -36,7 +37,7 @@ public class AppDataManager implements DataManager {
     private NetworkHelper networkHelper;
     private String userName;
     private String userEmail;
-    private int userLoginStatus;
+    private LoginMode userLoginStatus;
     private String userStatus;
     private Application application;
     private boolean backgroundMode = true;
@@ -96,14 +97,14 @@ public class AppDataManager implements DataManager {
 
     // **************** Shared preferences data access methods *****************
     @Override
-    public int getLoginStatus() {
+    public LoginMode getLoginStatus() {
         return userLoginStatus;
     }
 
     @Override
     public void setLoginStatus(LoginMode loginMode) {
         preferencesHelper.setLoginStatus(loginMode);
-        userLoginStatus = loginMode.getMode();
+        userLoginStatus = loginMode;
     }
 
     @Override
@@ -197,6 +198,8 @@ public class AppDataManager implements DataManager {
             if (backgroundMode) {
                 // Show new messages' notification
                 NewMessageNotification.notify(application, messages);
+            } else {
+                Objects.requireNonNull(getMessagesFromLocalDatabase().getValue()).getDataSource().invalidate();
             }
             listenForNewMessages(newestMessageDate, this);
         }

@@ -69,7 +69,7 @@ public class ChatActivityViewModel extends AndroidViewModel {
 
     }
 
-    int getLoginStatus(){
+    LoginMode getLoginStatus(){
         return dataManager.getLoginStatus();
     }
 
