@@ -13,6 +13,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -34,7 +35,7 @@ import androidx.annotation.NonNull;
  */
 
 @Singleton
-public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>, OnSuccessListener<QuerySnapshot>, OnCompleteListener{
+public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>, OnSuccessListener<QuerySnapshot>, OnCompleteListener<DocumentReference>{
     private static final String TAG = FireBaseAPI.class.getSimpleName();
     private final CollectionReference chatsRef;
     private final CollectionReference usersRef;
@@ -47,7 +48,6 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
         firebaseFirestore = FirebaseFirestore.getInstance();
         chatsRef = firebaseFirestore.collection("chats");
         usersRef = firebaseFirestore.collection("users");
-
     }
 
     /**
@@ -85,7 +85,6 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
     public void getNewMessagesFromBackendDatabase(Date date, NewMessagesCallback callback) {
         setNewMessagesCallback(callback);
         chatsRef.whereGreaterThan("time", new Timestamp(date)).get().addOnSuccessListener(this);
-
     }
 
     /**
@@ -93,11 +92,9 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
      */
     @Override
     public void sendMessagesToBackendDatabase(ArrayList<Message> messages) {
-
         for(Message message : messages){
             //TODO implement success listener
             chatsRef.add(message).addOnCompleteListener(this);
-
         }
     }
 
@@ -127,14 +124,13 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
      */
     @Override
     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-        if(!queryDocumentSnapshots.getMetadata().isFromCache()){
+        if (!queryDocumentSnapshots.getMetadata().isFromCache()) {
             List<DocumentSnapshot> snapshots = queryDocumentSnapshots.getDocuments();
-
             ArrayList<Message> newMessages = new ArrayList<>();
 
-            for (DocumentSnapshot snapshot:snapshots){
+            for (DocumentSnapshot snapshot:snapshots) {
                 String sender = snapshot.getString("sender");
-                if (sender != null && !sender.equals(userName)){
+                if (sender != null && !sender.equals(userName)) {
                     String key = snapshot.getId();
                     String text = snapshot.getString("text");
                     Date date = snapshot.getDate("time");
@@ -142,7 +138,7 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
                 }
             }
 
-            if(newMessages.size() > 0 ){
+            if (newMessages.size() > 0 ) {
                 // save new messages to local database
                 newMessagesCallback.onNewMessages(newMessages);
             } else {
@@ -159,12 +155,10 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
      */
     @Override
     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-        if (e == null){
-            if(queryDocumentSnapshots != null && !queryDocumentSnapshots.getMetadata().isFromCache()){
+        if (e == null) {
+            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getMetadata().isFromCache()) {
                 // if the query snapshot is not from cache proceed to get new messages
-
                 List<DocumentSnapshot> snapshots = queryDocumentSnapshots.getDocuments();
-
                 ArrayList<Message> newMessages = new ArrayList<>();
 
                 for (DocumentSnapshot snapshot:snapshots){
@@ -186,7 +180,8 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
                 Log.d(TAG, "snapshot from Firebase" + queryDocumentSnapshots.getMetadata().toString());
             }
 
-        }else {
+        } else {
+            // Error occurred in getting messages
             Log.e(TAG, e.getMessage());
         }
 
@@ -206,6 +201,7 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
         if (listenerRegistration != null){
             listenerRegistration.remove();
         }
+
         firebaseFirestore.disableNetwork();
     }
 

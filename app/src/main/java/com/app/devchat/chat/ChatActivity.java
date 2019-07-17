@@ -71,12 +71,11 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatroom);
 
+        // Dagger & Butternut invocation
         ((BaseApplication) getApplication()).getComponent().inject(this);
-
         ButterKnife.bind(this);
 
         enableStrictMode();
-
         createNotificationChannel();
 
         inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -88,6 +87,7 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
 
     }
 
+    // ******************* Overflow menu logic ********************************
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -100,7 +100,6 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_item_logout) {
-
             viewModel.setLoginStatus(LoginMode.LOGGED_OUT);
             userLogin();
         }
@@ -127,7 +126,6 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
             isBound = true;
             viewModel.setBackgroundMode(false);
             loadUI();
-
         }
 
         @Override
@@ -136,21 +134,9 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
         }
     };
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        //Clear any notifications
-        NewMessageNotification.cancel(this);
-        WorkManager.getInstance().cancelAllWork();
 
-        // bind to messaging service
-        Intent intent = new Intent(getApplicationContext(), MessagingService.class);
-        getApplicationContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
-
-    }
 
     void loadUI(){
-
         if (viewModel.getLoginStatus() == LoginMode.LOGGED_OUT){
             userLogin();
         }
@@ -166,14 +152,6 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
             });
         });
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(isBound){
-            viewModel.setBackgroundMode(false);
-        }
     }
 
     /**
@@ -199,19 +177,18 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
             channel.shouldVibrate();
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
 
             if (notificationManager != null) {
                 notificationManager.createNotificationChannel(channel);
             }
-
         }
     }
 
+    // ********************* Login Auth logic ********************************************
+
     void userLogin(){
-        // Launch Firebase AuthUI
+        // Prepare authorisation providers
         List<AuthUI.IdpConfig> authProviders = Arrays.asList(
                  new AuthUI.IdpConfig.FacebookBuilder().build(),
                 new AuthUI.IdpConfig.GoogleBuilder().build(),
@@ -219,6 +196,7 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
                 new AuthUI.IdpConfig.AnonymousBuilder().build()
         );
 
+        // Launch FirebaseAuth login screen
         startActivityForResult(
                 AuthUI.getInstance()
                 .createSignInIntentBuilder()
@@ -231,52 +209,58 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == REQUEST_CODE_SIGN_IN && data != null){
+        // Process the user response from FirebaseAuth login UI.
+        if (requestCode == REQUEST_CODE_SIGN_IN && data != null) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
-
-            if(resultCode == RESULT_OK){
-                switch (Objects.requireNonNull(response).getProviderType()) {
-                    case "anonymous":
-                        viewModel.setLoginStatus(LoginMode.ANONYMOUS_LOGIN);
-                        break;
-                    case "password":
-                        viewModel.setLoginStatus(LoginMode.EMAIL_LOGIN);
-                        break;
-                    case "google.com":
-                        viewModel.setLoginStatus(LoginMode.GOOGLE_LOGIN);
-                        break;
-                    case "facebook.com":
-                        viewModel.setLoginStatus(LoginMode.FB_LOGIN);
-                        break;
-                }
-
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                String userName = user.getDisplayName();
-                String userEmail = user.getEmail();
-                Uri userPhotoUri = user.getPhotoUrl();
-                String authProvider = user.getProviderId();
-                if(response.isNewUser()){
-                    //Save user to backend database
-                    User user1 = new User(
-                            userName,
-                            userEmail,
-                            userPhotoUri,
-                            authProvider
-                    );
-
-                    viewModel.saveNewUserToBackend(user1);
-
-                }
-            }else {
-                Log.e(TAG, "Firebase error", response.getError());
+            if (resultCode == RESULT_OK) {
+                saveLoginInfo(response);
+            } else {
+                Log.e(TAG, "Firebase error", Objects.requireNonNull(response).getError());
             }
-        } else if (data == null) {
-            // i.e when user presses back button
+
+        } else {
+            // User pressed the back button
             AnonymousLoginConfirmDialog dialog = AnonymousLoginConfirmDialog.newInstance();
             dialog.show(getSupportFragmentManager(), "Login alert");
         }
     }
 
+    private void saveLoginInfo(IdpResponse response) {
+        switch (Objects.requireNonNull(response).getProviderType()) {
+            case "anonymous":
+                viewModel.setLoginStatus(LoginMode.ANONYMOUS_LOGIN);
+                break;
+            case "password":
+                viewModel.setLoginStatus(LoginMode.EMAIL_LOGIN);
+                break;
+            case "google.com":
+                viewModel.setLoginStatus(LoginMode.GOOGLE_LOGIN);
+                break;
+            case "facebook.com":
+                viewModel.setLoginStatus(LoginMode.FB_LOGIN);
+                break;
+        }
+
+        if(response.isNewUser()){
+            // Save new user information
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            String userName = user.getDisplayName();
+            String userEmail = user.getEmail();
+            Uri userPhotoUri = user.getPhotoUrl();
+            String authProvider = user.getProviderId();
+            User user1 = new User(
+                    userName,
+                    userEmail,
+                    userPhotoUri,
+                    authProvider
+            );
+            viewModel.saveNewUserToBackend(user1);
+        }
+    }
+
+    /**
+     * Callback method which receives the id of the {@link AnonymousLoginConfirmDialog} {@link DialogFragment}.
+     */
     @Override
     public void onDialogConfirm(int confirmation) {
         if (isBound) {
@@ -287,19 +271,28 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
                     userLogin();
                 case DialogInterface.BUTTON_NEUTRAL:
                     finish();
-
             }
         }
+    }
+
+    // ********************* Lifecycle logic *************************************
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //Clear any notifications
+        NewMessageNotification.cancel(this);
+        WorkManager.getInstance().cancelAllWork();
+
+        // bind to messaging service
+        Intent intent = new Intent(getApplicationContext(), MessagingService.class);
+        getApplicationContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
     }
 
-    /**
-     * Dispatch onPause() to fragments.
-     */
     @Override
     protected void onPause() {
         if(isBound){
-
             viewModel.setBackgroundMode(true);
         }
         super.onPause();
@@ -309,9 +302,9 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
     protected void onStop() {
         super.onStop();
         if (isBound) {
-            // Start background messages service
-            viewModel.setBackgroundMode(true);
             viewModel.getData().removeObservers(this);
+            // Enable new message notification display.
+            viewModel.setBackgroundMode(true);
         }
     }
 

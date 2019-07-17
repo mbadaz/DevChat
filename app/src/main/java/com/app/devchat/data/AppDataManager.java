@@ -29,12 +29,12 @@ import androidx.paging.PagedList;
  * New messages from the remote database are simply added to the local database and the UI will update accordingly.
  */
 @Singleton
-public class AppDataManager implements DataManager {
+public class AppDataManager<T extends NetworkHelper> implements DataManager {
 
     private static final String TAG = AppDataManager.class.getSimpleName();
     private PreferencesHelper preferencesHelper;
     private LocalDatabaseHelper localDatabaseHelper;
-    private NetworkHelper networkHelper;
+    private T networkHelper;
     private String userName;
     private String userEmail;
     private LoginMode userLoginStatus;
@@ -44,7 +44,7 @@ public class AppDataManager implements DataManager {
 
     @Inject
     public AppDataManager(PreferencesHelper preferencesHelper,
-                          LocalDatabaseHelper dbHelper, NetworkHelper networkHelper, Application application){
+                          LocalDatabaseHelper dbHelper, T networkHelper, Application application){
 
         this.preferencesHelper = preferencesHelper;
         this.localDatabaseHelper = dbHelper;

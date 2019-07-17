@@ -8,6 +8,7 @@ import com.app.devchat.DepedencyInjecton.AppComponent;
 import com.app.devchat.DepedencyInjecton.AppModule;
 import com.app.devchat.DepedencyInjecton.DaggerAppComponent;
 import com.app.devchat.backgroundMessaging.MessagingService;
+import com.app.devchat.data.Network.FireBaseAPI;
 
 
 import androidx.multidex.MultiDex;

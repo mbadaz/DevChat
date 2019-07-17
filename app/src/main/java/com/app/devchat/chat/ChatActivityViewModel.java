@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.paging.PagedList;
+import androidx.room.Update;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,7 +35,6 @@ public class ChatActivityViewModel extends AndroidViewModel {
 
     void setService(MessagingService messagingService){
         dataManager = messagingService.getData();
-        this.dataManager.setBackgroundMode(false);
     }
 
     LiveData<PagedList<Message>> getData(){
@@ -52,11 +52,12 @@ public class ChatActivityViewModel extends AndroidViewModel {
         return dataManager.getUserName();
     }
 
-
     void saveNewUserToBackend(User user){
+        // new user to backend database
         dataManager.addNewUserToBackEndDatabase(user);
-        LoginMode loginMode;
 
+        // Update local user info store
+        LoginMode loginMode;
         if (user.getSignInMethod().equals(FacebookAuthProvider.FACEBOOK_SIGN_IN_METHOD)){
             loginMode = LoginMode.FB_LOGIN;
         } else if (user.getSignInMethod().equals(GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD)){
@@ -66,7 +67,6 @@ public class ChatActivityViewModel extends AndroidViewModel {
         }
 
         dataManager.updateUserInfo(user.getUserName(), user.getUserEmail(), user.getPhotoUrl(), loginMode);
-
     }
 
     LoginMode getLoginStatus(){

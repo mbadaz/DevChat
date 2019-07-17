@@ -48,7 +48,7 @@ public class AppModule {
 
     @Provides
     @Singleton
-    static NetworkHelper provideAppNeworkHelper(){
+    static FireBaseAPI provideAppNeworkHelper(){
         return new FireBaseAPI();
     }
 
@@ -66,11 +66,9 @@ public class AppModule {
 
     @Provides
     @Singleton
-    DataManager provideDataManager(AppDataManager dataManager){
+    DataManager provideDataManager(AppDataManager<FireBaseAPI> dataManager){
         return dataManager;
     }
-
-
 
 
 }
