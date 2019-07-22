@@ -1,10 +1,8 @@
-package com.app.devchat.backgroundMessaging;
+package com.app.devchat.backgroundServices;
 
 
 
-import android.app.IntentService;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -16,7 +14,6 @@ import com.app.devchat.DepedencyInjecton.AppModule;
 import com.app.devchat.DepedencyInjecton.DaggerMessagingServiceComponent;
 import com.app.devchat.data.DataManager;
 import com.app.devchat.data.Network.FireBaseAPI;
-import com.app.devchat.data.SqlDatabase.SQLiteDatabaseHelper;
 
 import java.util.Date;
 
@@ -45,7 +42,6 @@ public class MessagingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        ((FireBaseAPI) dataManager.getNetworkHelper()).enable();
         Date date = dataManager.getNewestMessageDate();
         if (date != null) {
             dataManager.getNewMessagesFromBackendDatabase(date, dataManager);
@@ -80,7 +76,7 @@ public class MessagingService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
-        ((FireBaseAPI) dataManager.getNetworkHelper()).disable();
+       // ((FireBaseAPI) dataManager.getNetworkHelper()).disable();
         // Schedule background new message checking task
         BackgroundMessagingWorker.enqeueWork();
     }

@@ -1,6 +1,6 @@
 package com.app.devchat.DepedencyInjecton;
 
-import com.app.devchat.backgroundMessaging.BackgroundMessagingWorker;
+import com.app.devchat.backgroundServices.BackgroundMessagingWorker;
 
 
 import javax.inject.Singleton;

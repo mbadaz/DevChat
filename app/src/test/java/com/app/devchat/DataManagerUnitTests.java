@@ -5,12 +5,14 @@ import android.app.Application;
 import com.app.devchat.data.AppDataManager;
 import com.app.devchat.data.DataManager;
 import com.app.devchat.data.DataModels.Message;
+import com.app.devchat.data.Network.FireBaseAPI;
 import com.app.devchat.data.Network.NetworkHelper;
 import com.app.devchat.data.NewMessagesCallback;
 import com.app.devchat.data.SharedPrefs.PreferencesHelper;
 import com.app.devchat.data.SqlDatabase.LocalDatabaseHelper;
 import com.google.common.collect.Lists;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,12 +27,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.Date;
 
-import androidx.core.app.NotificationCompat;
-
 @RunWith(MockitoJUnitRunner.class)
 public class DataManagerUnitTests {
     @Mock
     NetworkHelper networkHelper;
+
+    @Mock
+    FireBaseAPI fireBaseAPI;
 
     @Mock
     LocalDatabaseHelper database;
@@ -39,23 +42,21 @@ public class DataManagerUnitTests {
     PreferencesHelper preferencesHelper;
 
     @Captor
-    ArgumentCaptor<NewMessagesCallback> newMessagesCallback;
+    ArgumentCaptor<Date> dateArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<NewMessagesCallback> newMessagesCallbackArgumentCaptor;
 
 
     DataManager dataManager;
 
-    @Mock
-    DataManager mockDataManager;
-
-    @Mock
-    NotificationCompat.Builder builder;
 
 
 
     final ArrayList<Message> NEW_MESSAGES = Lists.newArrayList(
-            new Message("hello", new Date(), "Me"),
-            new Message("hello", new Date(), "Me"),
-            new Message("hello", new Date(), "Me"));
+            new Message(null, "hello", new Date(), "Me"),
+            new Message(null, "hello", new Date(), "Me"),
+            new Message(null,"hello", new Date(), "Me"));
 
     @Before
     public void prepareDatabase(){
@@ -67,10 +68,11 @@ public class DataManagerUnitTests {
     @Test
     public void getNewMessagesFromBackendTest(){
         Date date = new Date();
+        Date date2 = new Date();
         dataManager.getNewMessagesFromBackendDatabase(date, null);
-        Mockito.verify(networkHelper).getNewMessagesFromBackendDatabase(Matchers.any(), newMessagesCallback.capture());
-        newMessagesCallback.getValue().onNewMessages(NEW_MESSAGES);
-        Mockito.verify(database).storeMessagesToLocalDatabase(NEW_MESSAGES);
+
+        Mockito.verify(fireBaseAPI).getNewMessagesFromBackendDatabase(dateArgumentCaptor.capture(), newMessagesCallbackArgumentCaptor.capture() );
+        Assert.assertSame(date, dateArgumentCaptor.getValue());
 
     }
 }

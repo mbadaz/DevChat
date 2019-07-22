@@ -2,7 +2,7 @@ package com.app.devchat.chat;
 
 import android.app.Application;
 
-import com.app.devchat.backgroundMessaging.MessagingService;
+import com.app.devchat.backgroundServices.MessagingService;
 import com.app.devchat.data.DataManager;
 import com.app.devchat.data.DataModels.Message;
 import com.app.devchat.data.DataModels.User;
@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.paging.PagedList;
-import androidx.room.Update;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,7 +32,7 @@ public class ChatActivityViewModel extends AndroidViewModel {
     }
 
 
-    void setService(MessagingService messagingService){
+    public void setService(MessagingService messagingService){
         dataManager = messagingService.getData();
     }
 
@@ -41,18 +40,20 @@ public class ChatActivityViewModel extends AndroidViewModel {
         return dataManager.getMessagesFromLocalDatabase();
     }
 
-    void sendMessage(String text){
+    public void sendMessage(String text){
         ArrayList<Message> messages = new ArrayList<>();
-        messages.add(new Message(null, text, new Date(), dataManager.getUserName()));
+        Date date = new Date();
+        messages.add(new Message(null, text, date, dataManager.getUserName()));
         dataManager.storeMessagesToLocalDatabase(messages);
         dataManager.sendMessagesToBackendDatabase(messages);
+        dataManager.listenForNewMessages(date, dataManager);
     }
 
     String getUserName(){
         return dataManager.getUserName();
     }
 
-    void saveNewUserToBackend(User user){
+    public void saveNewUserToBackend(User user){
         // new user to backend database
         dataManager.addNewUserToBackEndDatabase(user);
 
@@ -69,15 +70,15 @@ public class ChatActivityViewModel extends AndroidViewModel {
         dataManager.updateUserInfo(user.getUserName(), user.getUserEmail(), user.getPhotoUrl(), loginMode);
     }
 
-    LoginMode getLoginStatus(){
+    public LoginMode getLoginStatus(){
         return dataManager.getLoginStatus();
     }
 
-    void setLoginStatus(LoginMode mode) {
+    public void setLoginStatus(LoginMode mode) {
         dataManager.setLoginStatus(mode);
     }
 
-    void setBackgroundMode(boolean mode){
+    public void setBackgroundMode(boolean mode){
         dataManager.setBackgroundMode(mode);
     }
 

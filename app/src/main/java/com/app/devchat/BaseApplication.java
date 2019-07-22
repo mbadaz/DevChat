@@ -7,8 +7,7 @@ import android.content.Intent;
 import com.app.devchat.DepedencyInjecton.AppComponent;
 import com.app.devchat.DepedencyInjecton.AppModule;
 import com.app.devchat.DepedencyInjecton.DaggerAppComponent;
-import com.app.devchat.backgroundMessaging.MessagingService;
-import com.app.devchat.data.Network.FireBaseAPI;
+import com.app.devchat.backgroundServices.MessagingService;
 
 
 import androidx.multidex.MultiDex;
@@ -22,10 +21,6 @@ public class BaseApplication extends MultiDexApplication {
     public void onCreate() {
         super.onCreate();
         component = DaggerAppComponent.builder().appModule(new AppModule(this)).build();
-        // start messaging service
-        Intent intent = new Intent(getApplicationContext(), MessagingService.class);
-        getApplicationContext().startService(intent);
-
     }
 
     @Override

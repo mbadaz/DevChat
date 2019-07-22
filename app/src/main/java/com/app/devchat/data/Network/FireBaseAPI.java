@@ -1,16 +1,13 @@
 package com.app.devchat.data.Network;
 
-import android.content.Context;
 import android.util.Log;
 
-import com.app.devchat.backgroundMessaging.MessagingService;
 import com.app.devchat.data.DataModels.Message;
 import com.app.devchat.data.DataModels.User;
 import com.app.devchat.data.NewMessagesCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;

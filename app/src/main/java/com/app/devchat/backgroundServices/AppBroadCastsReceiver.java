@@ -1,10 +1,8 @@
-package com.app.devchat.backgroundMessaging;
+package com.app.devchat.backgroundServices;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-
-import com.app.devchat.backgroundMessaging.MessagingService;
 
 import java.util.Objects;
 

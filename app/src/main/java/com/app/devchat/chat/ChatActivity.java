@@ -22,7 +22,7 @@ import com.app.devchat.BaseApplication;
 import com.app.devchat.BuildConfig;
 import com.app.devchat.NewMessageNotification;
 import com.app.devchat.R;
-import com.app.devchat.backgroundMessaging.MessagingService;
+import com.app.devchat.backgroundServices.MessagingService;
 import com.app.devchat.data.DataModels.User;
 import com.app.devchat.data.LoginMode;
 import com.firebase.ui.auth.AuthUI;
@@ -84,6 +84,11 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
         layoutManager.setSmoothScrollbarEnabled(true);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
+
+        // bind to messaging service
+        Intent intent = new Intent(getApplicationContext(), MessagingService.class);
+        startService(intent);
+        getApplicationContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
     }
 
@@ -283,10 +288,6 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
         //Clear any notifications
         NewMessageNotification.cancel(this);
         WorkManager.getInstance().cancelAllWork();
-
-        // bind to messaging service
-        Intent intent = new Intent(getApplicationContext(), MessagingService.class);
-        getApplicationContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
     }
 

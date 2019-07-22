@@ -25,7 +25,7 @@
         </activity>
 
         <service
-            android:name=".backgroundMessaging.MessagingService"
+            android:name=".backgroundServices.MessagingService"
             android:enabled="true"
             android:exported="true" />
     </application>

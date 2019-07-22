@@ -6,10 +6,16 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 
 import com.app.devchat.BuildConfig;
+import com.app.devchat.ThreadHelper;
 import com.app.devchat.data.DataModels.Message;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -25,12 +31,11 @@ import androidx.room.Room;
  * to load paged data from the SQL database.
  */
 @Singleton
-public class SQLiteDatabaseHelper implements LocalDatabaseHelper, Runnable{
+public class SQLiteDatabaseHelper implements LocalDatabaseHelper, Callable<Date> {
 
     private static final String DB_NAME = BuildConfig.APPLICATION_ID + ".db";
     private LiveData<PagedList<Message>> messagesList;
     private AppDatabase db;
-    private Date latestMessageDate;
 
     @Inject
     public SQLiteDatabaseHelper(Context context) {
@@ -82,31 +87,25 @@ public class SQLiteDatabaseHelper implements LocalDatabaseHelper, Runnable{
      * @return Date
      */
     @Override
-    public Date getNewestMessageDate() {
-        Thread thread = new Thread(this);
-        thread.run();
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public Date getNewestMessageDate(){
+        ThreadHelper<Date> threadHelper = new ThreadHelper<>();
 
-        return latestMessageDate;
+        return threadHelper.runBackgroundTask(this, 1);
     }
 
     @Override
-    public void run() {
+    public Date call() {
         Cursor cursor = db.query("SELECT * FROM Messages ORDER BY time DESC LIMIT 1", null);
 
         int timeColumnIndex = cursor.getColumnIndex("time");
 
         if (cursor.getCount() < 0) {
             // if the database is empty i.e app has been newly installed
-            latestMessageDate = null;
-        }else if (cursor.moveToFirst()) {
-            latestMessageDate = new Date(cursor.getLong(timeColumnIndex));
+            return null;
+        } else {
+            cursor.moveToFirst();
+            return new Date(cursor.getLong(timeColumnIndex));
         }
-
     }
 
     public void stopDatabase(){

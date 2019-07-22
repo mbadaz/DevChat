@@ -198,9 +198,8 @@ public class AppDataManager<T extends NetworkHelper> implements DataManager {
             if (backgroundMode) {
                 // Show new messages' notification
                 NewMessageNotification.notify(application, messages);
-            } else {
-                Objects.requireNonNull(getMessagesFromLocalDatabase().getValue()).getDataSource().invalidate();
             }
+
             listenForNewMessages(newestMessageDate, this);
         }
 

@@ -1,4 +1,4 @@
-package com.app.devchat.backgroundMessaging;
+package com.app.devchat.backgroundServices;
 
 
 import android.content.Context;
@@ -41,6 +41,7 @@ public class BackgroundMessagingWorker extends Worker implements NewMessagesCall
     public BackgroundMessagingWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
 
+        //Dagger invocation
         DaggerMessagingWokerComponent.builder().
                 appModule(new AppModule(context.getApplicationContext())).
                 build().inject(this);
@@ -64,6 +65,7 @@ public class BackgroundMessagingWorker extends Worker implements NewMessagesCall
     @NonNull
     @Override
     public Result doWork() {
+
         ((FireBaseAPI)(dataManager.getNetworkHelper())).enable();
         threadLatch = new CountDownLatch(1);
 
@@ -74,7 +76,7 @@ public class BackgroundMessagingWorker extends Worker implements NewMessagesCall
         try {
             dataManager.getNewMessagesFromBackendDatabase(date, this);
 
-            // Lock thread and wait 15 seconds for new messages callback (onNewMessages) to get called
+            // Lock thread and wait 15 seconds for callback with new messages (onNewMessages) to get called
             threadLatch.await(15, TimeUnit.SECONDS);
 
             if (threadLatch.getCount() > 0) {
@@ -105,7 +107,5 @@ public class BackgroundMessagingWorker extends Worker implements NewMessagesCall
     @Override
     public void onStopped() {
         super.onStopped();
-        ((FireBaseAPI)(dataManager.getNetworkHelper())).disable();
-        ((SQLiteDatabaseHelper)(dataManager.getLocalDatabaseHeper())).stopDatabase();
     }
 }
