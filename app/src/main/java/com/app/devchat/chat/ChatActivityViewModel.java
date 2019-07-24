@@ -43,7 +43,7 @@ public class ChatActivityViewModel extends AndroidViewModel {
     public void sendMessage(String text){
         ArrayList<Message> messages = new ArrayList<>();
         Date date = new Date();
-        messages.add(new Message(null, text, date, dataManager.getUserName()));
+        messages.add(new Message(null, text, date, dataManager.getUserName(), Message.MessageType.TEXT));
         dataManager.storeMessagesToLocalDatabase(messages);
         dataManager.sendMessagesToBackendDatabase(messages);
         dataManager.listenForNewMessages(date, dataManager);

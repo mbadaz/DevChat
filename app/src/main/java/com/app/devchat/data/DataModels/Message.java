@@ -10,11 +10,14 @@ import androidx.room.PrimaryKey;
 
 @Entity(tableName = "Messages")
 public class Message {
+    public enum MessageType{
+        TEXT,
+        MULTIMEDIA;
+    }
 
     @PrimaryKey(autoGenerate = true)
     @NonNull
     public int id;
-
 
     public String key;
 
@@ -27,11 +30,16 @@ public class Message {
     @ColumnInfo
     public String sender;
 
+    @ColumnInfo
+    public MessageType type;
+
+
     @Ignore
-    public Message(String key, String text, Date time, String sender) {
+    public Message(String key, String text, Date time, String sender, MessageType type) {
         this.text = text;
         this.time = time;
         this.sender = sender;
+        this.type = type;
     }
 
     public Message(){

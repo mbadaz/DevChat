@@ -131,7 +131,7 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
                     String key = snapshot.getId();
                     String text = snapshot.getString("text");
                     Date date = snapshot.getDate("time");
-                    newMessages.add(new Message(key, text, date, sender));
+                    newMessages.add(new Message(key, text, date, sender, Message.MessageType.TEXT));
                 }
             }
 
@@ -164,7 +164,7 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
                         String key = snapshot.getId();
                         String text = snapshot.getString("text");
                         Date date = snapshot.getDate("time");
-                        newMessages.add(new Message(key, text, date, sender));
+                        newMessages.add(new Message(key, text, date, sender, Message.MessageType.TEXT));
                     }
                 }
 

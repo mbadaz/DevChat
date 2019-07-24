@@ -8,6 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.app.devchat.R;
+import com.app.devchat.ThreadHelper;
 import com.app.devchat.data.DataModels.Message;
 
 import java.text.SimpleDateFormat;
@@ -31,6 +32,7 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
      */
     private final String userName;
     private final Context context;
+    private Calendar today = new GregorianCalendar();
 
     ChatsAdapter(Context context, String userName) {
         super(DIFF_CALLBACK);
@@ -43,7 +45,7 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext()).
-                    inflate(R.layout.chat_listitem, parent, false);
+                    inflate(viewType, parent, false);
 
         return new MyViewHolder(view);
     }
@@ -54,22 +56,34 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
         Message message = getItem(position);
         //RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)holder.rootView.getLayoutParams();
         int margin = context.getResources().getDimensionPixelSize(R.dimen.dimen_list_item_margin);
-        if(message.getSender().equals(userName)){
-
-            holder.inMessageRootView.setVisibility(View.GONE);
-            holder.outMessageRootView.setVisibility(View.VISIBLE);
-            holder.out_sender.setVisibility(View.GONE);
-            holder.out_text.setText(message.getText());
-            holder.out_time.setText(formatDate(message.getTime()));
-
-        }else {
-
-            holder.outMessageRootView.setVisibility(View.GONE);
-            holder.inMessageRootView.setVisibility(View.VISIBLE);
-            holder.in_sender.setText(message.getSender());
-            holder.in_text.setText(message.getText());
-            holder.in_time.setText(formatDate(message.getTime()));
+        holder.text.setText(message.text);
+        holder.time.setText(formatDate(message.time));
+        if(holder.sender != null){
+            holder.sender.setText(message.sender);
         }
+    }
+
+    /**
+     * Return the view type of the item at <code>position</code> for the purposes
+     * of view recycling.
+     *
+     * <p>The default implementation of this method returns 0, making the assumption of
+     * a single view type for the adapter. Unlike ListView adapters, types need not
+     * be contiguous. Consider using id resources to uniquely identify item view types.
+     *
+     * @param position position to query
+     * @return integer value identifying the type of the view needed to represent the item at
+     * <code>position</code>. Type codes need not be contiguous.
+     */
+    @Override
+    public int getItemViewType(int position) {
+        boolean isInMessage = !getItem(position).sender.equals(userName);
+        if (isInMessage) {
+            return R.layout.in_message_list_item;
+        } else {
+            return R.layout.out_message_list_item;
+        }
+
     }
 
     private String formatDate(Date date){
@@ -77,7 +91,6 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
         SimpleDateFormat day;
         SimpleDateFormat fullDate;
 
-        Calendar today = new GregorianCalendar();
         today.set(Calendar.HOUR_OF_DAY, 0);
         today.set(Calendar.MINUTE, 0);
         today.set(Calendar.SECOND, 0);
@@ -100,26 +113,21 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {
-        TextView out_sender;
-        TextView out_text;
-        TextView out_time;
-        TextView in_sender;
-        TextView in_text;
-        TextView in_time;
-        RelativeLayout inMessageRootView;
-        RelativeLayout outMessageRootView;
+        TextView sender;
+        TextView text;
+        TextView time;
+
 
         MyViewHolder(@NonNull View itemView) {
             super(itemView);
+            text = itemView.findViewById(R.id.message_text);
+            time = itemView.findViewById(R.id.message_time);
+            if (itemView.getId() == R.id.in_message_root_view) {
+                sender = itemView.findViewById(R.id.message_sender);
+            } else {
+                sender = null;
+            }
 
-            out_sender = itemView.findViewById(R.id.out_message_sender);
-            out_text = itemView.findViewById(R.id.out_message_text);
-            out_time = itemView.findViewById(R.id.out_message_time);
-            in_sender = itemView.findViewById(R.id.in_message_sender);
-            in_text = itemView.findViewById(R.id.in_message_text);
-            in_time = itemView.findViewById(R.id.in_message_time);
-            inMessageRootView = itemView.findViewById(R.id.in_message_root_view);
-            outMessageRootView = itemView.findViewById(R.id.out_message_root_view);
         }
 
     }
