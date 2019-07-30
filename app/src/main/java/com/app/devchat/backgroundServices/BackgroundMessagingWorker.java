@@ -17,10 +17,7 @@ import com.app.devchat.DepedencyInjecton.DaggerMessagingWokerComponent;
 import com.app.devchat.NewMessageNotification;
 import com.app.devchat.data.DataManager;
 import com.app.devchat.data.DataModels.Message;
-import com.app.devchat.data.Network.FireBaseAPI;
 import com.app.devchat.data.NewMessagesCallback;
-import com.app.devchat.data.SqlDatabase.SQLiteDatabaseHelper;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
@@ -65,8 +62,6 @@ public class BackgroundMessagingWorker extends Worker implements NewMessagesCall
     @NonNull
     @Override
     public Result doWork() {
-
-        ((FireBaseAPI)(dataManager.getNetworkHelper())).enable();
         threadLatch = new CountDownLatch(1);
 
         // Get latest message date in local database to use as basis for

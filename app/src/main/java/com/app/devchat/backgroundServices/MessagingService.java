@@ -13,7 +13,6 @@ import androidx.annotation.NonNull;
 import com.app.devchat.DepedencyInjecton.AppModule;
 import com.app.devchat.DepedencyInjecton.DaggerMessagingServiceComponent;
 import com.app.devchat.data.DataManager;
-import com.app.devchat.data.Network.FireBaseAPI;
 
 import java.util.Date;
 

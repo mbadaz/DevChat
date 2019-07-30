@@ -7,9 +7,7 @@ import android.content.Intent;
 import com.app.devchat.DepedencyInjecton.AppComponent;
 import com.app.devchat.DepedencyInjecton.AppModule;
 import com.app.devchat.DepedencyInjecton.DaggerAppComponent;
-import com.app.devchat.backgroundServices.MessagingService;
-
-
+import com.app.devchat.DepedencyInjecton.DaggerAppComponent;
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 

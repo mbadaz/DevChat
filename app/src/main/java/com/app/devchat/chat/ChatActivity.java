@@ -20,6 +20,7 @@ import android.widget.EditText;
 
 import com.app.devchat.BaseApplication;
 import com.app.devchat.BuildConfig;
+import com.app.devchat.DepedencyInjecton.ViewModelsFactory;
 import com.app.devchat.NewMessageNotification;
 import com.app.devchat.R;
 import com.app.devchat.backgroundServices.MessagingService;
@@ -38,6 +39,10 @@ import javax.inject.Inject;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.WorkManager;
@@ -54,6 +59,8 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
     public static final int REQUEST_CODE_SIGN_IN = 2;
 
     @Inject
+    ViewModelsFactory viewModelFactory;
+
     ChatActivityViewModel viewModel;
 
     @BindView(R.id.message_input)
@@ -74,6 +81,9 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
         // Dagger & Butternut invocation
         ((BaseApplication) getApplication()).getComponent().inject(this);
         ButterKnife.bind(this);
+
+        viewModel = ViewModelProviders.of(this, viewModelFactory).
+                get(ChatActivityViewModel.class);
 
         enableStrictMode();
         createNotificationChannel();

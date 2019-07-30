@@ -16,20 +16,16 @@ import javax.inject.Singleton;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
 import androidx.paging.PagedList;
 
 import java.util.ArrayList;
 import java.util.Date;
 
 @Singleton
-public class ChatActivityViewModel extends AndroidViewModel {
+public class ChatActivityViewModel extends ViewModel {
 
     private DataManager dataManager;
-
-    @Inject
-    public ChatActivityViewModel(@NonNull Application application) {
-        super(application);
-    }
 
 
     public void setService(MessagingService messagingService){
