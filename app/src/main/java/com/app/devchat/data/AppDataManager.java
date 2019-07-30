@@ -25,16 +25,16 @@ import androidx.paging.PagedList;
  * This is the apps {@link DataManager} implementation and handles processing of all the app's
  * data. For consistency the in the processing of data, AppDataManager regards the local database
  * i.e {@link SQLiteDatabaseHelper} as the app's single source of truth.
- * This means that the UI only observes the local database for its data and not the remote database.
+ * This means that the UI only observes the local database for its data.
  * New messages from the remote database are simply added to the local database and the UI will update accordingly.
  */
 @Singleton
-public class AppDataManager<T extends NetworkHelper> implements DataManager {
+public class AppDataManager implements DataManager {
 
     private static final String TAG = AppDataManager.class.getSimpleName();
     private PreferencesHelper preferencesHelper;
     private LocalDatabaseHelper localDatabaseHelper;
-    private T networkHelper;
+    private NetworkHelper networkHelper;
     private String userName;
     private String userEmail;
     private LoginMode userLoginStatus;
@@ -44,7 +44,7 @@ public class AppDataManager<T extends NetworkHelper> implements DataManager {
 
     @Inject
     public AppDataManager(PreferencesHelper preferencesHelper,
-                          LocalDatabaseHelper dbHelper, T networkHelper, Application application){
+                          LocalDatabaseHelper dbHelper, NetworkHelper networkHelper, Application application){
 
         this.preferencesHelper = preferencesHelper;
         this.localDatabaseHelper = dbHelper;
@@ -166,22 +166,6 @@ public class AppDataManager<T extends NetworkHelper> implements DataManager {
         return localDatabaseHelper.getNewestMessageDate();
     }
 
-
-    // ************ Apis direct access methods ********************
-    @Override
-    public NetworkHelper getNetworkHelper() {
-        return networkHelper;
-    }
-
-    @Override
-    public LocalDatabaseHelper getLocalDatabaseHeper() {
-        return localDatabaseHelper;
-    }
-
-    @Override
-    public PreferencesHelper getPreferencesHelper() {
-        return preferencesHelper;
-    }
 
     /**
      * New messages callback method

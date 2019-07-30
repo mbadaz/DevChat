@@ -81,5 +81,4 @@ public class MessagingService extends Service {
         BackgroundMessagingWorker.enqeueWork();
     }
 
-
 }
