@@ -27,6 +27,7 @@ import androidx.paging.PagedList;
 import androidx.room.Room;
 
 /**
+ * Production implementation of {@link LocalDatabaseHelper}
  * Api for the app's database functions. Uses the Room Persistence library and the Paging library
  * to load paged data from the SQL database.
  */
@@ -89,9 +90,10 @@ public class SQLiteDatabaseHelper implements LocalDatabaseHelper, Callable<Date>
     @Override
     public Date getNewestMessageDate(){
         ThreadHelper<Date> threadHelper = new ThreadHelper<>();
-
         return threadHelper.runBackgroundTask(this, 1);
     }
+
+
 
     @Override
     public Date call() {

@@ -13,7 +13,6 @@ import com.app.devchat.data.SqlDatabase.SQLiteDatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -53,7 +52,7 @@ public class AppDataManager implements DataManager {
 
         loadData();
 
-        networkHelper.setUserName(getUserName());
+        networkHelper.setUserId(getUserName());
     }
 
     private void loadData() {
@@ -113,7 +112,7 @@ public class AppDataManager implements DataManager {
     }
 
     @Override
-    public void setUserName(String value) {
+    public void setUserId(String value) {
         preferencesHelper.setUserName(value);
         userName = value;
     }
@@ -143,7 +142,7 @@ public class AppDataManager implements DataManager {
 
     @Override
     public void updateUserInfo(String username, String userEmail, String userPhoto, LoginMode loginMode) {
-        setUserName(username);
+        setUserId(username);
         setUserEmail(userEmail);
         setLoginStatus(loginMode);
     }

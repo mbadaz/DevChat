@@ -81,7 +81,7 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
     @Override
     public void getNewMessagesFromBackendDatabase(Date date, NewMessagesCallback callback) {
         setNewMessagesCallback(callback);
-        chatsRef.whereLessThan("time", new Timestamp(date)).get().addOnSuccessListener(this);
+        chatsRef.whereGreaterThan("time", new Timestamp(date)).get().addOnSuccessListener(this);
     }
 
     /**
@@ -105,7 +105,7 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
     }
 
     @Override
-    public void setUserName(String userName) {
+    public void setUserId(String userName) {
         FireBaseAPI.userName = userName;
     }
 

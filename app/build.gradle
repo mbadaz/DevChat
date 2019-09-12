@@ -13,13 +13,37 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
+
     buildTypes {
-        release {
+
+        debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
         }
     }
+
+    flavorDimensions "default"
+
+    productFlavors {
+        prod {
+            dimension "default"
+        }
+
+        mock {
+            dimension "default"
+        }
+    }
+
+    // Remove the mockRelease
+    android.variantFilter { variant ->
+        if (variant.buildType.name == 'release') {
+            variant.setIgnore(true)
+        }
+    }
+
     buildToolsVersion '28.0.3'
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -33,74 +57,56 @@ android {
 dependencies {
     //Apps dependencies
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.appcompat:appcompat:1.1.0-alpha04'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha5'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.android.support:multidex:1.0.3'
-    implementation 'com.google.errorprone:error_prone_annotations:2.3.1'
-    implementation 'org.checkerframework:checker-compat-qual:2.5.3'
-    implementation "com.google.guava:guava:$rootProject.guavaVersion"
-    compileOnly 'javax.annotation:jsr250-api:1.0'
-    implementation 'javax.inject:javax.inject:1'
-    implementation "androidx.work:work-runtime:2.0.1"
+    implementation "androidx.appcompat:appcompat:$rootProject.ext.appCompatVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$rootProject.ext.constraintLayoutVersion"
+    implementation "androidx.legacy:legacy-support-v4:$rootProject.ext.legacySupportVersion"
+    implementation "com.android.support:multidex:$rootProject.multidexVersion"
+    implementation 'com.google.errorprone:error_prone_annotations:2.3.3'
+    implementation 'org.checkerframework:checker-compat-qual:2.5.5'
+    implementation "com.google.guava:guava:$rootProject.ext.guavaVersion"
+    compileOnly "javax.annotation:jsr250-api:$rootProject.ext.javaxVersion"
+    implementation "javax.inject:javax.inject:1"
+    implementation "com.google.firebase:firebase-core:$rootProject.ext.firebaseCoreVersion"
+    implementation "com.google.firebase:firebase-firestore:$rootProject.ext.firestoreVersion"
+    implementation "com.firebaseui:firebase-ui-auth:$rootProject.ext.firebaseUiAuthVersion"
+    implementation 'com.google.firebase:firebase-auth:19.0.0'
+    implementation "com.google.dagger:dagger:$rootProject.ext.daggerVersion"
+    annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.ext.daggerVersion"
+    implementation "com.github.bumptech.glide:glide:$rootProject.ext.glideVersion"
+    annotationProcessor "com.github.bumptech.glide:compiler:$rootProject.ext.glideVersion"
+    implementation "com.jakewharton:butterknife:$rootProject.ext.butterKnifeVersion"
+    annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.ext.butterKnifeVersion"
+    implementation "com.facebook.android:facebook-android-sdk:$rootProject.ext.facebookSdkVersion"
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.ext.retrofit2Version"
 
-    //Local unit tests dependencies
+    //Unit tests dependencies
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
-    testImplementation "org.mockito:mockito-all:$rootProject.ext.mockitoVersion"
     testImplementation "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
     testImplementation "org.powermock:powermock-module-junit4:$rootProject.ext.powerMockito"
     testImplementation "org.powermock:powermock-api-mockito:$rootProject.ext.powerMockito"
+    testImplementation "org.mockito:mockito-all:$rootProject.ext.mockitoVersion"
 
-    //Android Tests Support Library
-    androidTestImplementation 'androidx.test:core:1.1.0'
-    androidTestImplementation 'androidx.test.ext:truth:1.1.0'
-    androidTestImplementation 'com.google.truth:truth:0.42'
+    //Instrumented Tests dependencies
+    androidTestImplementation "androidx.test:core:$rootProject.ext.androidTestCoreVersion"
+    androidTestImplementation "androidx.test.ext:truth:$rootProject.ext.androidTestTruthVersion"
+    androidTestImplementation "com.google.truth:truth:$rootProject.ext.googleTruthVersion"
     androidTestImplementation "androidx.test:runner:$rootProject.ext.runnerVersion"
-    androidTestImplementation "androidx.test:rules:$rootProject.ext.rulesVersion"
-    androidTestImplementation 'androidx.test:rules:1.1.1'
-
-    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
-    androidTestUtil 'androidx.test:orchestrator:1.1.1'
-
-    //Espresso UI Testing Library
+    androidTestImplementation "androidx.test:rules:$rootProject.ext.androidTestRulesVersion"
+    androidTestImplementation "androidx.test:rules:$rootProject.ext.androidTestRulesVersion"
+    androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.androidJunitVersion"
+    androidTestUtil "androidx.test:orchestrator:$rootProject.ext.testOrchestratorVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$rootProject.ext.espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$rootProject.ext.espressoVersion"
     implementation "androidx.test.espresso:espresso-idling-resource:$rootProject.ext.espressoVersion"
 
-
-    //ButterKnife
-    implementation "com.jakewharton:butterknife:$rootProject.ext.butterKnifeVersion"
-    annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.ext.butterKnifeVersion"
-
-    //Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
-
-    //Room Database
+    // Jetpack dependencies
     implementation "androidx.room:room-runtime:$rootProject.ext.roomVersion"
     annotationProcessor "androidx.room:room-compiler:$rootProject.ext.roomVersion"
-
-    //Paging Library
-    implementation "androidx.paging:paging-runtime:2.1.0"
-
-    //Firebase
-    implementation 'com.google.firebase:firebase-core:16.0.9'
-    implementation 'com.google.firebase:firebase-database:17.0.0'
-    implementation 'com.google.firebase:firebase-firestore:19.0.0'
-    implementation 'com.firebaseui:firebase-ui-auth:4.3.1'
-    implementation 'com.google.firebase:firebase-auth:17.0.0'
-
-    //Dagger
-    implementation "com.google.dagger:dagger:$rootProject.ext.daggerVersion"
-    annotationProcessor "com.google.dagger:dagger-compiler:$rootProject.ext.daggerVersion"
-
-    //Glide
-    implementation "com.github.bumptech.glide:glide:$rootProject.ext.glideVersion"
-    annotationProcessor "com.github.bumptech.glide:compiler:$rootProject.ext.glideVersion"
-
-    //Facebook Auth Api
-    implementation 'com.facebook.android:facebook-android-sdk:4.41.0'
-
+    implementation "androidx.work:work-runtime:$rootProject.ext.androidWorkVersion"
+    implementation "androidx.paging:paging-runtime:$rootProject.ext.androidPagingVersion"
+    implementation "android.arch.lifecycle:extensions:1.1.1"
+    implementation "android.arch.lifecycle:viewmodel:1.1.1"
 
 
 }

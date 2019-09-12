@@ -36,7 +36,7 @@ public class FirebaseApiTest  {
         ArrayList<Message> messagesToBeSent = new ArrayList<>();
         final ArrayList<Message>[] messagesReceived = new ArrayList[]{new ArrayList<Message>()};
         messagesToBeSent.add(newMessage);
-        fireBaseAPI.setUserName("test");
+        fireBaseAPI.setUserId("test");
         NewMessagesCallback mockCallback = messages -> {
 
             messagesReceived[0] = messages;

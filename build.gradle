@@ -7,8 +7,8 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.2'
-        classpath 'com.google.gms:google-services:4.2.0'
+        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.google.gms:google-services:4.3.1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle
@@ -29,16 +29,42 @@ task clean(type: Delete) {
 }
 
 ext {
-    guavaVersion = '18.0'
-    junitVersion = '4.12'
-    mockitoVersion = '1.10.19'
-    powerMockito = '1.6.2'
+    // Sdk and tools
+    targetSdkVersion = 28
+    compileSdkVersion = 28
+    minSdkVersion = 16
+    buildToolsVersion = '28.0.3'
+
+    //App dependencies
+    guavaVersion = '28.1-jre'
+    junitVersion = '4.13-beta-3'
+    androidTestCoreVersion = '1.2.1-alpha02'
+    androidTestTruthVersion = '1.3.0-alpha02'
+    androidTestRulesVersion = '1.3.0-alpha02'
+    androidJunitVersion = '1.1.2-alpha02'
+    testOrchestratorVersion = '1.3.0-alpha02'
+    mockitoVersion = '2.0.2-beta'
+    powerMockito = '1.6.6'
     hamcrestVersion = '1.3'
-    runnerVersion = '1.0.2'
+    runnerVersion = '1.3.0-alpha02'
     rulesVersion = '1.0.2'
-    espressoVersion = '3.1.1'
+    espressoVersion = '3.3.0-alpha02'
     glideVersion = '4.9.0'
-    butterKnifeVersion = '10.0.0'
-    daggerVersion = '2.16'
-    roomVersion = '2.1.0-beta01'
+    butterKnifeVersion = '10.1.0'
+    daggerVersion = '2.24'
+    roomVersion = '2.2.0-beta01'
+    androidWorkVersion = '2.3.0-alpha01'
+    var = '3.6.0-alpha01'
+    appCompatVersion = '1.1.0-rc01'
+    constraintLayoutVersion = '2.0.0-beta2'
+    legacySupportVersion = '1.0.0'
+    multidexVersion = '1.0.3'
+    javaxVersion = '1.0'
+    firebaseCoreVersion = '17.2.0'
+    firestoreVersion = '21.0.0'
+    firebaseUiAuthVersion = '4.3.1'
+    facebookSdkVersion = '4.41.0'
+    retrofit2Version = '2.6.1'
+    googleTruthVersion = '1.0'
+    androidPagingVersion = '2.1.0'
 }

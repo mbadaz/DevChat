@@ -19,7 +19,7 @@ public interface NetworkHelper {
 
     void sendMessagesToBackendDatabase(ArrayList<Message> messages);
 
-    void setUserName(String userName);
+    void setUserId(String userName);
 
     void addNewUserToBackEndDatabase(User user);
 }

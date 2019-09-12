@@ -16,6 +16,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
@@ -32,7 +33,17 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
      */
     private final String userName;
     private final Context context;
-    private Calendar today = new GregorianCalendar();
+    private static final Calendar today;
+    private String previousMessageSender = null;
+
+    static {
+        today = new GregorianCalendar();
+        today.set(Calendar.HOUR_OF_DAY, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        today.set(Calendar.MILLISECOND, 0);
+    }
+
 
     ChatsAdapter(Context context, String userName) {
         super(DIFF_CALLBACK);
@@ -46,6 +57,8 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
 
         View view = LayoutInflater.from(parent.getContext()).
                     inflate(viewType, parent, false);
+
+
 
         return new MyViewHolder(view);
     }
@@ -77,11 +90,27 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
      */
     @Override
     public int getItemViewType(int position) {
-        boolean isInMessage = !getItem(position).sender.equals(userName);
+        String sender = Objects.requireNonNull(getItem(position)).sender;
+        boolean isInMessage = !sender.equals(userName);
+        boolean isSameSender = getItemCount() -1 != position && Objects.requireNonNull(getItem(position + 1)).
+                sender.equals(Objects.requireNonNull(getItem(position)).sender);
+
         if (isInMessage) {
-            return R.layout.in_message_list_item;
+            if (isSameSender) {
+
+                return R.layout.in_message_list_item_no_pointer;
+            } else {
+
+                return R.layout.in_message_list_item;
+            }
         } else {
-            return R.layout.out_message_list_item;
+            if (isSameSender ) {
+
+                return R.layout.out_message_list_item_no_pointer;
+            } else {
+
+                return R.layout.out_message_list_item;
+            }
         }
 
     }
@@ -91,10 +120,6 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
         SimpleDateFormat day;
         SimpleDateFormat fullDate;
 
-        today.set(Calendar.HOUR_OF_DAY, 0);
-        today.set(Calendar.MINUTE, 0);
-        today.set(Calendar.SECOND, 0);
-        today.set(Calendar.MILLISECOND, 0);
 
         long diffMillis = (today.getTimeInMillis() - date.getTime());
         long diff = TimeUnit.DAYS.convert(diffMillis, java.util.concurrent.TimeUnit.MILLISECONDS);
@@ -122,7 +147,7 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
             super(itemView);
             text = itemView.findViewById(R.id.message_text);
             time = itemView.findViewById(R.id.message_time);
-            if (itemView.getId() == R.id.in_message_root_view) {
+            if (itemView.getId() == R.id.in_message_root) {
                 sender = itemView.findViewById(R.id.message_sender);
             } else {
                 sender = null;
@@ -135,12 +160,12 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
     private static final DiffUtil.ItemCallback<Message> DIFF_CALLBACK = new DiffUtil.ItemCallback<Message>() {
         @Override
         public boolean areItemsTheSame(@NonNull Message oldItem, @NonNull Message newItem) {
-            return oldItem.id == newItem.id;
+            return oldItem.equals(newItem);
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull Message oldItem, @NonNull Message newItem) {
-            return oldItem.equals(newItem);
+            return oldItem.id == newItem.id;
         }
     };
 
