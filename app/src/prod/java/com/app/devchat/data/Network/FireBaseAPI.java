@@ -61,7 +61,7 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
     /**
      * Updates the {@link EventListener} for listening for new message updates from
      * the Firebase realtime database
-     * @param date is the date that is the basis of the listener's query
+     * @param date is the timestamp of the latest message in the local database 
      */
     private void updateOnNewMessageListener(Date date) {
         if(listenerRegistration == null){
