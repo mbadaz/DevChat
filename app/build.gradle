@@ -3,6 +3,8 @@ apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 29
+    compileOptions.incremental = false
+
     defaultConfig {
         applicationId "com.app.devchat"
         minSdkVersion 16
@@ -12,13 +14,36 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
+
     buildTypes {
-        release {
+
+        debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
         }
     }
+
+    flavorDimensions "default"
+
+    productFlavors {
+        prod {
+            dimension "default"
+        }
+
+        mock {
+            dimension "default"
+        }
+    }
+
     buildToolsVersion '29.0.2'
+    // Remove the mockRelease
+    android.variantFilter { variant ->
+        if (variant.buildType.name == 'release') {
+            variant.setIgnore(true)
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -30,6 +55,7 @@ android {
 }
 
 dependencies {
+    //Apps dependencies
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.2.0-alpha03'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
@@ -84,6 +110,11 @@ dependencies {
     annotationProcessor 'com.google.dagger:dagger-compiler:2.24'
     compileOnly 'javax.annotation:jsr250-api:1.0'
     implementation 'javax.inject:javax.inject:1'
+
+    implementation "androidx.work:work-runtime:$rootProject.ext.androidWorkVersion"
+    implementation "androidx.paging:paging-runtime:$rootProject.ext.androidPagingVersion"
+    implementation "android.arch.lifecycle:extensions:1.1.1"
+    implementation "android.arch.lifecycle:viewmodel:1.1.1"
 
 
 }

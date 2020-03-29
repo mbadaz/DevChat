@@ -1,6 +1,7 @@
 package com.app.devchat.data.Network;
 
-import com.app.devchat.data.Message;
+import com.app.devchat.data.DataModels.Message;
+import com.app.devchat.data.DataModels.User;
 import com.app.devchat.data.NewMessagesCallback;
 
 import java.util.ArrayList;
@@ -12,13 +13,13 @@ import java.util.Date;
  */
 public interface NetworkHelper {
 
-    void listenForNewMessages(Date date);
+    void listenForNewMessages(Date date, NewMessagesCallback callback);
 
-    void getNewMessagesFromBackendDatabase(Date date);
+    void getNewMessagesFromBackendDatabase(Date date, NewMessagesCallback callback);
 
     void sendMessagesToBackendDatabase(ArrayList<Message> messages);
 
-    void setNewMessagesCallBack(NewMessagesCallback callBack);
+    void setUserId(String userName);
 
-    void setUserName(String userName);
+    void addNewUserToBackEndDatabase(User user);
 }
