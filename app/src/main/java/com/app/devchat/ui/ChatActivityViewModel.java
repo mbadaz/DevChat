@@ -47,7 +47,7 @@ public class ChatActivityViewModel extends AndroidViewModel {
         return dataManager.getUserName();
     }
 
-    void getNewMessages(Date date){
+    public void getNewMessages(Date date){
         if(!hasDoneIntialLoad){
             dataManager.getNewMessagesFromBackendDatabase(date);
             hasDoneIntialLoad = true;

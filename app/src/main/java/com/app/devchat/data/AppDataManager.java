@@ -27,12 +27,8 @@ public class AppDataManager implements DataManager {
     private String userEmail;
     private int userLoginStatus;
     private String userStatus;
-
     private Application application;
-
     private static DataManager dataManager;
-
-
 
     @Inject
     public AppDataManager(PreferencesHelper preferencesHelper,
