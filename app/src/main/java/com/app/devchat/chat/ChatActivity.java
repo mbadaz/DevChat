@@ -7,16 +7,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.StrictMode;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.app.devchat.BaseApplication;
 import com.app.devchat.BuildConfig;
@@ -24,24 +23,14 @@ import com.app.devchat.DepedencyInjecton.ViewModelsFactory;
 import com.app.devchat.NewMessageNotification;
 import com.app.devchat.R;
 import com.app.devchat.backgroundServices.MessagingService;
-import com.app.devchat.data.DataModels.User;
 import com.app.devchat.data.LoginMode;
-import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.IdpResponse;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
-import androidx.annotation.Nullable;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -66,6 +55,9 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
     @BindView(R.id.message_input)
     EditText messageInput;
 
+    @BindView(R.id.txtOnline)
+    TextView onlineStatusTextView;
+
     @BindView(R.id.chats_recycler_view)
     RecyclerView recyclerView;
 
@@ -73,10 +65,11 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
     private LinearLayoutManager layoutManager;
     private ChatsAdapter adapter;
     private boolean isBound;
+    private LiveData<String> onlineStatusStream;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chatroom);
+        setContentView(R.layout.activity_chat);
 
         // Dagger & Butternut invocation
         ((BaseApplication) getApplication()).getComponent().inject(this);
@@ -94,11 +87,6 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
         layoutManager.setSmoothScrollbarEnabled(true);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
-
-        // bind to messaging service
-        Intent intent = new Intent(getApplicationContext(), MessagingService.class);
-        startService(intent);
-        getApplicationContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
     }
 
@@ -167,6 +155,11 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
             });
         });
 
+        onlineStatusStream = viewModel.getOnlineStatusStream();
+        onlineStatusStream.observe(this, s -> {
+            onlineStatusTextView.setText(s);
+        });
+
     }
 
     /**
@@ -204,74 +197,74 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
 
     void userLogin(){
         // Prepare authorisation providers
-        List<AuthUI.IdpConfig> authProviders = Arrays.asList(
-                 new AuthUI.IdpConfig.FacebookBuilder().build(),
-                new AuthUI.IdpConfig.GoogleBuilder().build(),
-                new AuthUI.IdpConfig.EmailBuilder().build(),
-                new AuthUI.IdpConfig.AnonymousBuilder().build()
-        );
-
-        // Launch FirebaseAuth login screen
-        startActivityForResult(
-                AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAvailableProviders(authProviders)
-                .build(), REQUEST_CODE_SIGN_IN
-        );
+//        List<AuthUI.IdpConfig> authProviders = Arrays.asList(
+//                 new AuthUI.IdpConfig.FacebookBuilder().build(),
+//                new AuthUI.IdpConfig.GoogleBuilder().build(),
+//                new AuthUI.IdpConfig.EmailBuilder().build(),
+//                new AuthUI.IdpConfig.AnonymousBuilder().build()
+//        );
+//
+//        // Launch FirebaseAuth login screen
+//        startActivityForResult(
+//                AuthUI.getInstance()
+//                .createSignInIntentBuilder()
+//                .setAvailableProviders(authProviders)
+//                .build(), REQUEST_CODE_SIGN_IN
+//        );
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // Process the user response from FirebaseAuth login UI.
-        if (requestCode == REQUEST_CODE_SIGN_IN && data != null) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
-            if (resultCode == RESULT_OK) {
-                saveLoginInfo(response);
-            } else {
-                Log.e(TAG, "Firebase error", Objects.requireNonNull(response).getError());
-            }
-
-        } else {
-            // User pressed the back button
-            AnonymousLoginConfirmDialog dialog = AnonymousLoginConfirmDialog.newInstance();
-            dialog.show(getSupportFragmentManager(), "Login alert");
-        }
-    }
-
-    private void saveLoginInfo(IdpResponse response) {
-        switch (Objects.requireNonNull(response).getProviderType()) {
-            case "anonymous":
-                viewModel.setLoginStatus(LoginMode.ANONYMOUS_LOGIN);
-                break;
-            case "password":
-                viewModel.setLoginStatus(LoginMode.EMAIL_LOGIN);
-                break;
-            case "google.com":
-                viewModel.setLoginStatus(LoginMode.GOOGLE_LOGIN);
-                break;
-            case "facebook.com":
-                viewModel.setLoginStatus(LoginMode.FB_LOGIN);
-                break;
-        }
-
-        if(response.isNewUser()){
-            // Save new user information
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            String userName = user.getDisplayName();
-            String userEmail = user.getEmail();
-            Uri userPhotoUri = user.getPhotoUrl();
-            String authProvider = user.getProviderId();
-            User user1 = new User(
-                    userName,
-                    userEmail,
-                    userPhotoUri,
-                    authProvider
-            );
-            viewModel.saveNewUserToBackend(user1);
-        }
-    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        // Process the user response from FirebaseAuth login UI.
+//        if (requestCode == REQUEST_CODE_SIGN_IN && data != null) {
+//            IdpResponse response = IdpResponse.fromResultIntent(data);
+//            if (resultCode == RESULT_OK) {
+//                saveLoginInfo(response);
+//            } else {
+//                Log.e(TAG, "Firebase error", Objects.requireNonNull(response).getError());
+//            }
+//
+//        } else {
+//            // User pressed the back button
+//            AnonymousLoginConfirmDialog dialog = AnonymousLoginConfirmDialog.newInstance();
+//            dialog.show(getSupportFragmentManager(), "Login alert");
+//        }
+//    }
+//
+//    private void saveLoginInfo(IdpResponse response) {
+//        switch (Objects.requireNonNull(response).getProviderType()) {
+//            case "anonymous":
+//                viewModel.setLoginStatus(LoginMode.ANONYMOUS_LOGIN);
+//                break;
+//            case "password":
+//                viewModel.setLoginStatus(LoginMode.EMAIL_LOGIN);
+//                break;
+//            case "google.com":
+//                viewModel.setLoginStatus(LoginMode.GOOGLE_LOGIN);
+//                break;
+//            case "facebook.com":
+//                viewModel.setLoginStatus(LoginMode.FB_LOGIN);
+//                break;
+//        }
+//
+//        if(response.isNewUser()){
+//            // Save new user information
+//            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//            String userName = user.getDisplayName();
+//            String userEmail = user.getEmail();
+//            Uri userPhotoUri = user.getPhotoUrl();
+//            String authProvider = user.getProviderId();
+//            User user1 = new User(
+//                    userName,
+//                    userEmail,
+//                    userPhotoUri,
+//                    authProvider
+//            );
+//            viewModel.saveNewUserToBackend(user1);
+//        }
+//    }
 
     /**
      * Callback method which receives the id of the {@link AnonymousLoginConfirmDialog} {@link DialogFragment}.
@@ -297,15 +290,19 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
         super.onStart();
         //Clear any notifications
         NewMessageNotification.cancel(this);
-        WorkManager.getInstance().cancelAllWork();
-
+        WorkManager.getInstance(this).cancelAllWork();
+        // bind to messaging service
+        Intent intent = new Intent(getApplicationContext(), MessagingService.class);
+        getApplicationContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onPause() {
         if(isBound){
             viewModel.setBackgroundMode(true);
+            int myInt = 2;
         }
+
         super.onPause();
     }
 
@@ -314,8 +311,10 @@ public class ChatActivity extends AppCompatActivity implements AnonymousLoginCon
         super.onStop();
         if (isBound) {
             viewModel.getData().removeObservers(this);
+            onlineStatusStream.removeObservers(this);
             // Enable new message notification display.
             viewModel.setBackgroundMode(true);
+            boolean successful = viewModel.goOffline();
         }
     }
 

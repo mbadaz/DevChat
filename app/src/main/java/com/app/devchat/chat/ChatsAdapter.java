@@ -76,18 +76,6 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
         }
     }
 
-    /**
-     * Return the view type of the item at <code>position</code> for the purposes
-     * of view recycling.
-     *
-     * <p>The default implementation of this method returns 0, making the assumption of
-     * a single view type for the adapter. Unlike ListView adapters, types need not
-     * be contiguous. Consider using id resources to uniquely identify item view types.
-     *
-     * @param position position to query
-     * @return integer value identifying the type of the view needed to represent the item at
-     * <code>position</code>. Type codes need not be contiguous.
-     */
     @Override
     public int getItemViewType(int position) {
         String sender = Objects.requireNonNull(getItem(position)).sender;
@@ -97,22 +85,17 @@ public class ChatsAdapter extends PagedListAdapter<Message, ChatsAdapter.MyViewH
 
         if (isInMessage) {
             if (isSameSender) {
-
                 return R.layout.in_message_list_item_no_pointer;
             } else {
-
                 return R.layout.in_message_list_item;
             }
         } else {
             if (isSameSender ) {
-
                 return R.layout.out_message_list_item_no_pointer;
             } else {
-
                 return R.layout.out_message_list_item;
             }
         }
-
     }
 
     private String formatDate(Date date){

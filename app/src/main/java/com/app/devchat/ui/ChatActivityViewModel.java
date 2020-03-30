@@ -3,7 +3,7 @@ package com.app.devchat.ui;
 import android.app.Application;
 
 import com.app.devchat.data.DataManager;
-import com.app.devchat.data.Message;
+import com.app.devchat.data.DataModels.Message;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,13 +34,13 @@ public class ChatActivityViewModel extends AndroidViewModel {
 
     void sendMessage(String text){
         ArrayList<Message> messages = new ArrayList<>();
-        messages.add(new Message(text, new Date(), dataManager.getUserName()));
+        messages.add(new Message(text, new Date(), dataManager.getUserName(), Message.MessageType.TEXT));
         dataManager.storeMessagesToLocalDatabase(messages);
         dataManager.sendMessagesToBackendDatabase(messages);
     }
 
     public void listenForNewMessages(Date date){
-        dataManager.listenForNewMessages(date);
+        dataManager.listenForNewMessages(date, dataManager);
     }
 
     String getUserName(){
@@ -49,7 +49,7 @@ public class ChatActivityViewModel extends AndroidViewModel {
 
     public void getNewMessages(Date date){
         if(!hasDoneIntialLoad){
-            dataManager.getNewMessagesFromBackendDatabase(date);
+            dataManager.getNewMessagesFromBackendDatabase(date, dataManager);
             hasDoneIntialLoad = true;
         }
     }

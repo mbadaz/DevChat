@@ -8,10 +8,6 @@ import com.app.devchat.ThreadHelper;
 import com.app.devchat.data.LoginMode;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,7 +17,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class AppPreferenceHelper implements PreferencesHelper{
-    private static final String USER_INFO_PREFERENCE_FILE_KEY = BuildConfig.APPLICATION_ID + ".user_info";
+    public static final String USER_INFO_PREFERENCEs = BuildConfig.APPLICATION_ID + ".user_info";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_LOGIN_STATUS = "login_status";
     private static final String KEY_USER_EMAIL = "user_email";
@@ -32,7 +28,7 @@ public class AppPreferenceHelper implements PreferencesHelper{
     @Inject
     public AppPreferenceHelper(Context context) {
 
-        Callable<SharedPreferences> callable = () -> context.getSharedPreferences(USER_INFO_PREFERENCE_FILE_KEY, Context.MODE_PRIVATE);
+        Callable<SharedPreferences> callable = () -> context.getSharedPreferences(USER_INFO_PREFERENCEs, Context.MODE_PRIVATE);
         ThreadHelper<SharedPreferences> threadHelper = new ThreadHelper<>();
         mSharedPrefs = threadHelper.runBackgroundTask(callable, 1);
     }

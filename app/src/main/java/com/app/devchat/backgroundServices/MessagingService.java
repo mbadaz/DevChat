@@ -77,7 +77,7 @@ public class MessagingService extends Service {
         Log.d(TAG, "onDestroy");
        // ((FireBaseAPI) dataManager.getNetworkHelper()).disable();
         // Schedule background new message checking task
-        BackgroundMessagingWorker.enqeueWork();
+        BackgroundMessagingWorker.enqeueWork(getApplicationContext());
     }
 
 }

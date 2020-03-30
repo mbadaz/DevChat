@@ -2,6 +2,7 @@ package com.app.devchat.data.Network;
 
 import android.util.Log;
 
+import com.app.devchat.ThreadHelper;
 import com.app.devchat.data.DataModels.Message;
 import com.app.devchat.data.DataModels.User;
 import com.app.devchat.data.NewMessagesCallback;
@@ -21,11 +22,16 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 /**
  * Api for accessing the Firebase realtime database
@@ -36,15 +42,21 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
     private static final String TAG = FireBaseAPI.class.getSimpleName();
     private final CollectionReference chatsRef;
     private final CollectionReference usersRef;
+    private final DocumentReference onlineRef;
     private ListenerRegistration listenerRegistration;
     private static NewMessagesCallback newMessagesCallback;
     private static String userName;
     private final FirebaseFirestore firebaseFirestore;
+    private final MutableLiveData<String> onlineStatusStream = new MutableLiveData<>();
+    private long currentOnline = 0;
+    private  Boolean updateOnlineStatus = true;
 
     public FireBaseAPI() {
         firebaseFirestore = FirebaseFirestore.getInstance();
         chatsRef = firebaseFirestore.collection("chats");
         usersRef = firebaseFirestore.collection("users");
+        onlineRef = firebaseFirestore.collection("online").document("onlineUsers");
+
     }
 
     /**
@@ -105,6 +117,44 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
     }
 
     @Override
+    public LiveData<String> getOnlineStatusStream() {
+        onlineRef.addSnapshotListener((documentSnapshot, e) -> {
+            if (e == null) {
+                long online = (long) documentSnapshot.get("online");
+                onlineStatusStream.postValue(String.valueOf(online));
+                currentOnline = online;
+            }
+        });
+
+        onlineRef.get().addOnCompleteListener(documentSnapshot -> {
+            long online = (long) documentSnapshot.getResult().get("online");
+            online += 1;
+            onlineRef.update("online", online);
+        });
+        return onlineStatusStream;
+    }
+
+    @Override
+    public boolean goOffline() {
+        currentOnline -= 1;
+        final CountDownLatch latch = new CountDownLatch(1);
+        onlineRef.update("online", (currentOnline)).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+               latch.countDown();
+               updateOnlineStatus = false;
+            }
+        });
+
+        try {
+            latch.await(10000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    @Override
     public void setUserId(String userName) {
         FireBaseAPI.userName = userName;
     }
@@ -131,7 +181,7 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
                     String key = snapshot.getId();
                     String text = snapshot.getString("text");
                     Date date = snapshot.getDate("time");
-                    newMessages.add(new Message(key, text, date, sender, Message.MessageType.TEXT));
+                    newMessages.add(new Message(text, date, sender, Message.MessageType.TEXT));
                 }
             }
 
@@ -164,7 +214,7 @@ public class FireBaseAPI implements NetworkHelper, EventListener<QuerySnapshot>,
                         String key = snapshot.getId();
                         String text = snapshot.getString("text");
                         Date date = snapshot.getDate("time");
-                        newMessages.add(new Message(key, text, date, sender, Message.MessageType.TEXT));
+                        newMessages.add(new Message(text, date, sender, Message.MessageType.TEXT));
                     }
                 }
 

@@ -35,7 +35,7 @@ public class Message {
 
 
     @Ignore
-    public Message(String key, String text, Date time, String sender, MessageType type) {
+    public Message(String text, Date time, String sender, MessageType type) {
         this.text = text;
         this.time = time;
         this.sender = sender;

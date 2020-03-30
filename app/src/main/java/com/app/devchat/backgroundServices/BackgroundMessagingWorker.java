@@ -35,6 +35,7 @@ public class BackgroundMessagingWorker extends Worker implements NewMessagesCall
 
     private CountDownLatch threadLatch;
 
+
     public BackgroundMessagingWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
 
@@ -45,7 +46,7 @@ public class BackgroundMessagingWorker extends Worker implements NewMessagesCall
 
     }
 
-    static void enqeueWork(){
+    static void enqeueWork(Context context){
         Constraints constraints = new Constraints.Builder().
                 setRequiresBatteryNotLow(true).
                 setRequiredNetworkType(NetworkType.CONNECTED).build();
@@ -54,7 +55,7 @@ public class BackgroundMessagingWorker extends Worker implements NewMessagesCall
                 setConstraints(constraints).
                 build();
 
-        WorkManager.getInstance().enqueue(workRequest);
+        WorkManager.getInstance(context).enqueue(workRequest);
 
         Log.d(TAG, "Background messaging work enqueued");
     }

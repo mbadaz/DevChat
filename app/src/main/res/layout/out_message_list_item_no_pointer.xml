@@ -13,25 +13,34 @@
     tools:ignore="RtlSymmetry">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/out_message_root"
+        android:id="@+id/in_message_root"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginRight="8dp"
-        android:background="@drawable/out_message_bubble_no_pointer"
-        android:layout_marginEnd="8dp">
+        android:layout_gravity="start"
+        android:layout_marginStart="4dp"
+        android:background="@drawable/out_message_background_no_pointer">
 
+
+        <TextView
+            android:id="@+id/message_sender"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@tools:sample/full_names" />
 
         <TextView
             android:id="@+id/message_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="#0E0303"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/message_sender"
             tools:text="this is a test message \nThis is a test message" />
 
         <TextView
@@ -39,14 +48,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textStyle="italic"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/message_text"
             tools:text="@tools:sample/date/hhmmss" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </LinearLayout>

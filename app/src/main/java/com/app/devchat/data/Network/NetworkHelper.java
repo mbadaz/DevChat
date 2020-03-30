@@ -1,5 +1,7 @@
 package com.app.devchat.data.Network;
 
+import androidx.lifecycle.LiveData;
+
 import com.app.devchat.data.DataModels.Message;
 import com.app.devchat.data.DataModels.User;
 import com.app.devchat.data.NewMessagesCallback;
@@ -22,4 +24,8 @@ public interface NetworkHelper {
     void setUserId(String userName);
 
     void addNewUserToBackEndDatabase(User user);
+
+    LiveData<String> getOnlineStatusStream();
+
+    boolean goOffline();
 }

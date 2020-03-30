@@ -12,7 +12,7 @@ public class AppBroadCastsReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (Objects.requireNonNull(intent.getAction()).equals(Intent.ACTION_BOOT_COMPLETED)) {
             // Device has completed boot, schedule background messaging tasks
-            BackgroundMessagingWorker.enqeueWork();
+            BackgroundMessagingWorker.enqeueWork(context);
         }
 
     }

@@ -38,7 +38,6 @@ public class AppDataManager implements DataManager {
     private LoginMode userLoginStatus;
     private String userStatus;
     private Application application;
-    private static DataManager dataManager;
     private boolean backgroundMode = true;
 
     @Inject
@@ -91,6 +90,16 @@ public class AppDataManager implements DataManager {
     @Override
     public void addNewUserToBackEndDatabase(User user) {
         networkHelper.addNewUserToBackEndDatabase(user);
+    }
+
+    @Override
+    public LiveData<String> getOnlineStatusStream() {
+        return networkHelper.getOnlineStatusStream();
+    }
+
+    @Override
+    public boolean goOffline() {
+       return networkHelper.goOffline();
     }
 
 

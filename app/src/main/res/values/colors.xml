@@ -3,7 +3,10 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorBackground_light">#ECECFA</color>
 
-    <color name="colorOwnMessage">#63d26e</color>
-    <color name="colorOtherMessage">#30faf2</color>
+    <color name="colorOutMessage">#B0B0F1</color>
+    <color name="colorInMessage">#C2C675</color>
+    <color name="colorOnlineStatus">#1B5E20</color>
+    <color name="colorBackground">#DEEBF3</color>
 </resources>
